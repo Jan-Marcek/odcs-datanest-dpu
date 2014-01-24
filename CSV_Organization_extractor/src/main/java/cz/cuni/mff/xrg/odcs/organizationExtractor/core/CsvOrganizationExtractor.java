@@ -34,8 +34,6 @@ import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 @AsExtractor
 public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationExtractorConfig> implements ConfigDialogProvider<CsvOrganizationExtractorConfig> {
 
-    public final static String ORGANIZATIONS_BASE_URI = "http://data.gov.sk/id/interior/organization/";
-    public final static String OPENDATA_ORGANIZATIONS_CONTEXTS_KEY = "organizations";
     public final static String MODULE_NAME = "Csv_Organization_Extractor";
     private final Logger LOG = LoggerFactory.getLogger(CsvOrganizationExtractor.class);
 
