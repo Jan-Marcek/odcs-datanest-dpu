@@ -74,7 +74,7 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, workingDirDpu);
             File[] files = getFiles(workingDirDpu);
             exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
-            final long triplesCount = rdfDataUnit.getTripleCount();
+            long triplesCount = rdfDataUnit.getTripleCount();
             LOG.info("A harvesting is successfully finished : " + triplesCount);
         } catch (Exception e) {
             LOG.error("Error", e);
@@ -105,7 +105,7 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
             harvester.setDebugProcessOnlyNItems(debugProcessOnlyNItems);
             harvester.setBatchSize(batchSize);
             harvester.setSourceUrl(url);
-            LOG.info("A harvestering starts");
+            LOG.info("A harvesting starts");
             harvester.update();
         } catch (Exception e) {
             LOG.error("A problem occoured when a transformation csv -> rdf was performing", e);
