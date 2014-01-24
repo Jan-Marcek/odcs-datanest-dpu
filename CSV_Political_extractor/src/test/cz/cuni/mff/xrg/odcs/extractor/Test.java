@@ -12,9 +12,11 @@ public class Test {
     public void test() throws ConfigException {
         CsvPoliticalExtractor extractor = new CsvPoliticalExtractor();
         CsvPoliticalExtractorConfig config = new CsvPoliticalExtractorConfig();
+        config.DebugProcessOnlyNItems = 10;
         extractor.configureDirectly(config);
 
         TestEnvironment env = TestEnvironment.create();
+
         try {
             RDFDataUnit output = env.createRdfOutput("output", false);
             // run the execution
