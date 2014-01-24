@@ -12,6 +12,7 @@ public class Test {
     public void test() throws ConfigException {
         CsvOrganizationExtractor extractor = new CsvOrganizationExtractor();
         CsvOrganizationExtractorConfig config = new CsvOrganizationExtractorConfig();
+        config.DebugProcessOnlyNItems = 10;
         extractor.configureDirectly(config);
 
         TestEnvironment env = TestEnvironment.create();

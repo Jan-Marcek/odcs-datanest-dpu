@@ -52,8 +52,6 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
      */
     private TextField textFieldPath;
 
-    private TextField textFieldTargetPath;
-
     private TextField textFieldDebugProcessOnlyNItems;
 
     private TextField textFieldBatchSize;
@@ -175,8 +173,6 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
 
             conf.fileExtractType = extractType;
 
-            conf.TargetRDF = textFieldTargetPath.getValue().trim();
-
             conf.DebugProcessOnlyNItems = Integer.parseInt(textFieldDebugProcessOnlyNItems.getValue().trim());
 
             conf.BatchSize = Integer.parseInt(textFieldBatchSize.getValue().trim());
@@ -221,7 +217,6 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
         comboBoxFormat.setValue(conf.RDFFormatValue);
         useHandler.setValue(conf.UseStatisticalHandler);
         failWhenErrors.setValue(conf.failWhenErrors);
-        textFieldTargetPath.setValue(conf.TargetRDF);
         textFieldDebugProcessOnlyNItems.setValue(String.valueOf(conf.DebugProcessOnlyNItems));
         textFieldBatchSize.setValue(String.valueOf(conf.BatchSize));
 
@@ -499,12 +494,6 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
         FormLayout fl = new FormLayout();
         fl.setWidth("100%");
 
-        textFieldTargetPath = new TextField("RDF Format save to directory:");
-        textFieldTargetPath.setInputPrompt("file:\\C:\\");
-        textFieldTargetPath.setNullRepresentation("");
-        textFieldTargetPath.setWidth("100%");
-        textFieldTargetPath.setHeight("-1px");
-
         textFieldDebugProcessOnlyNItems = new TextField("Process only N items");
         textFieldDebugProcessOnlyNItems.setInputPrompt("10");
         textFieldDebugProcessOnlyNItems.setWidth("100%");
@@ -515,7 +504,6 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
         textFieldBatchSize.setWidth("100%");
         textFieldBatchSize.setHeight("-1px");
 
-        fl.addComponent(textFieldTargetPath);
         fl.addComponent(textFieldDebugProcessOnlyNItems);
         fl.addComponent(textFieldBatchSize);
         gridLayoutCore.addComponent(fl, 0, 4);
