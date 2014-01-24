@@ -12,7 +12,6 @@ import cz.cuni.mff.xrg.odcs.rdf.enums.RDFFormatType;
  */
 public class CsvProcurementsExtractorConfig extends DPUConfigObjectBase {
 
-    public String TargetRDF = "e:/eea/comsode/rdf";
     public String Path = "file:/e:/eea/comsode/dataset/procurements-dump.csv";
     public RDFFormatType RDFFormatValue = RDFFormatType.AUTO;
     public String FileSuffix = "";
@@ -26,7 +25,7 @@ public class CsvProcurementsExtractorConfig extends DPUConfigObjectBase {
 
     @Override
     public boolean isValid() {
-        return Path != null && TargetRDF != null && FileSuffix != null && RDFFormatValue != null && fileExtractType != null && DebugProcessOnlyNItems != null
+        return Path != null && FileSuffix != null && RDFFormatValue != null && fileExtractType != null && DebugProcessOnlyNItems != null
                 && BatchSize != null;
     }
 }

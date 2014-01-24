@@ -56,8 +56,6 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
 
     private HorizontalLayout horizontalLayoutFormat;
 
-    private TextField textFieldTargetPath;
-
     private TextField textFieldDebugProcessOnlyNItems;
 
     private TextField textFieldBatchSize;
@@ -172,15 +170,9 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
             conf.RDFFormatValue = (RDFFormatType) comboBoxFormat.getValue();
             conf.UseStatisticalHandler = useHandler.getValue();
             conf.failWhenErrors = failWhenErrors.getValue();
-
             conf.fileExtractType = extractType;
-
-            conf.TargetRDF = textFieldTargetPath.getValue().trim();
-
             conf.DebugProcessOnlyNItems = Integer.parseInt(textFieldDebugProcessOnlyNItems.getValue().trim());
-
             conf.BatchSize = Integer.parseInt(textFieldBatchSize.getValue().trim());
-
             return conf;
         }
     }
@@ -221,7 +213,6 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
         comboBoxFormat.setValue(conf.RDFFormatValue);
         useHandler.setValue(conf.UseStatisticalHandler);
         failWhenErrors.setValue(conf.failWhenErrors);
-        textFieldTargetPath.setValue(conf.TargetRDF);
         textFieldDebugProcessOnlyNItems.setValue(String.valueOf(conf.DebugProcessOnlyNItems));
         textFieldBatchSize.setValue(String.valueOf(conf.BatchSize));
 
@@ -318,7 +309,7 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
      */
     private GridLayout buildGridLayoutCore() {
         // common part: create layout
-        gridLayoutCore = new GridLayout(1, 7);
+        gridLayoutCore = new GridLayout(1, 6);
         gridLayoutCore.setImmediate(false);
         gridLayoutCore.setWidth("100%");
         gridLayoutCore.setHeight("100%");
@@ -492,12 +483,6 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
         FormLayout fl = new FormLayout();
         fl.setWidth("100%");
 
-        textFieldTargetPath = new TextField("RDF Format save to directory:");
-        textFieldTargetPath.setInputPrompt("C:\\");
-        textFieldTargetPath.setNullRepresentation("");
-        textFieldTargetPath.setWidth("100%");
-        textFieldTargetPath.setHeight("-1px");
-
         textFieldDebugProcessOnlyNItems = new TextField("Process only N items");
         textFieldDebugProcessOnlyNItems.setInputPrompt("10");
         textFieldDebugProcessOnlyNItems.setWidth("100%");
@@ -508,7 +493,6 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
         textFieldBatchSize.setWidth("100%");
         textFieldBatchSize.setHeight("-1px");
 
-        fl.addComponent(textFieldTargetPath);
         fl.addComponent(textFieldDebugProcessOnlyNItems);
         fl.addComponent(textFieldBatchSize);
         gridLayoutCore.addComponent(fl, 0, 4);
@@ -516,7 +500,7 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
     }
 
     private void prepareDirectoryForm() {
-        textFieldPath.setInputPrompt("C:\\ted\\");
+        textFieldPath.setInputPrompt("file:\\C:\\ted\\");
 
         // Adding component for specify path to directory
         gridLayoutCore.addComponent(textFieldPath, 0, 1);
@@ -611,7 +595,7 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
     /**
      * Basic constructor
      *
-     * @param upload
+     * @param nextUpload
      *            . Upload component
      */
     public UploadInfoWindow(Upload nextUpload) {
