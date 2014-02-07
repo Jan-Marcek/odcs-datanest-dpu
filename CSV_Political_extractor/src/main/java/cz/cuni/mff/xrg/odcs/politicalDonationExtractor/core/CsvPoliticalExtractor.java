@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import cz.cuni.mff.xrg.odcs.commons.message.MessageType;
-import cz.cuni.mff.xrg.odcs.rdf.exceptions.RDFException;
+import org.apache.commons.io.FileUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +16,8 @@ import cz.cuni.mff.xrg.odcs.commons.dpu.DPUContext;
 import cz.cuni.mff.xrg.odcs.commons.dpu.DPUException;
 import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.AsExtractor;
 import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.OutputDataUnit;
+import cz.cuni.mff.xrg.odcs.commons.message.MessageType;
 import cz.cuni.mff.xrg.odcs.commons.module.dpu.ConfigurableBase;
-import cz.cuni.mff.xrg.odcs.commons.module.file.FileManager;
 import cz.cuni.mff.xrg.odcs.commons.web.AbstractConfigDialog;
 import cz.cuni.mff.xrg.odcs.commons.web.ConfigDialogProvider;
 import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.datanest.AbstractDatanestHarvester;
@@ -26,6 +25,7 @@ import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.datanest.PoliticalPartyDo
 import cz.cuni.mff.xrg.odcs.rdf.enums.FileExtractType;
 import cz.cuni.mff.xrg.odcs.rdf.enums.HandlerExtractType;
 import cz.cuni.mff.xrg.odcs.rdf.enums.RDFFormatType;
+import cz.cuni.mff.xrg.odcs.rdf.exceptions.RDFException;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 /**
@@ -74,6 +74,7 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, workingDirDpu);
             File[] files = getFiles(workingDirDpu);
             exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
+            FileUtils.deleteDirectory(workingDirDpu);
             long triplesCount = rdfDataUnit.getTripleCount();
             LOG.info("A harvesting is successfully finished : " + triplesCount);
         } catch (Exception e) {
@@ -98,7 +99,7 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
         return url;
     }
 
-    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu)  {
+    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu) {
         AbstractDatanestHarvester<?> harvester;
         try {
             harvester = new PoliticalPartyDonationsDatanestHarvester(workingDirDpu.getAbsolutePath());
@@ -114,12 +115,16 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
     }
 
     private void exportFiles(DPUContext context, String baseURI, FileExtractType extractType, String fileSuffix, boolean onlyThisSuffix, RDFFormat format,
-                             HandlerExtractType handlerExtractType, File[] files) {
+            HandlerExtractType handlerExtractType, File[] files) {
         for (File tmpRdf : files) {
             try {
-                rdfDataUnit.extractFromFile(extractType, format, tmpRdf.getAbsolutePath(), fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
-                tmpRdf.deleteOnExit();
+                String path = tmpRdf.toURI().toURL().toExternalForm();
+                LOG.debug("rdf file: " + path);
+                rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
             } catch (RDFException e) {
+                LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
+                context.sendMessage(MessageType.ERROR, e.getMessage());
+            } catch (MalformedURLException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
                 context.sendMessage(MessageType.ERROR, e.getMessage());
             }
@@ -136,7 +141,6 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
 
         return workingDirDpu.listFiles(directoryFilter);
     }
-
 
     @Override
     public AbstractConfigDialog<CsvPoliticalExtractorConfig> getConfigurationDialog() {
