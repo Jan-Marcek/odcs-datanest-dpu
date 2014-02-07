@@ -5,11 +5,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
-import java.util.Vector;
 
-import cz.cuni.mff.xrg.odcs.commons.message.MessageType;
-import cz.cuni.mff.xrg.odcs.rdf.exceptions.RDFException;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +15,16 @@ import cz.cuni.mff.xrg.odcs.commons.dpu.DPUContext;
 import cz.cuni.mff.xrg.odcs.commons.dpu.DPUException;
 import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.AsExtractor;
 import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.OutputDataUnit;
+import cz.cuni.mff.xrg.odcs.commons.message.MessageType;
 import cz.cuni.mff.xrg.odcs.commons.module.dpu.ConfigurableBase;
-import cz.cuni.mff.xrg.odcs.commons.module.file.FileManager;
 import cz.cuni.mff.xrg.odcs.commons.web.AbstractConfigDialog;
 import cz.cuni.mff.xrg.odcs.commons.web.ConfigDialogProvider;
-import cz.cuni.mff.xrg.odcs.procurementExtractor.data.AbstractRecord;
 import cz.cuni.mff.xrg.odcs.procurementExtractor.datanest.AbstractDatanestHarvester;
 import cz.cuni.mff.xrg.odcs.procurementExtractor.datanest.ProcurementsDatanestHarvester;
 import cz.cuni.mff.xrg.odcs.rdf.enums.FileExtractType;
 import cz.cuni.mff.xrg.odcs.rdf.enums.HandlerExtractType;
 import cz.cuni.mff.xrg.odcs.rdf.enums.RDFFormatType;
+import cz.cuni.mff.xrg.odcs.rdf.exceptions.RDFException;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 /**
@@ -46,6 +42,7 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
     public CsvProcurementsExtractor() {
         super(CsvProcurementsExtractorConfig.class);
     }
+
     @Override
     public void execute(DPUContext context) throws DataUnitException, DPUException {
         final String baseURI = "";
@@ -100,7 +97,7 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
         return url;
     }
 
-    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu)  {
+    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu) {
         AbstractDatanestHarvester<?> harvester;
         try {
             harvester = new ProcurementsDatanestHarvester(workingDirDpu.getAbsolutePath());
@@ -116,12 +113,18 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
     }
 
     private void exportFiles(DPUContext context, String baseURI, FileExtractType extractType, String fileSuffix, boolean onlyThisSuffix, RDFFormat format,
-                             HandlerExtractType handlerExtractType, File[] files) {
+            HandlerExtractType handlerExtractType, File[] files) {
         for (File tmpRdf : files) {
             try {
-                rdfDataUnit.extractFromFile(extractType, format, tmpRdf.getAbsolutePath(), fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
-                tmpRdf.deleteOnExit();
+                if (tmpRdf.exists()) {
+                    String path = tmpRdf.toURI().toURL().toExternalForm();
+                    LOG.debug("rdf file: " + path);
+                    rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
+                }
             } catch (RDFException e) {
+                LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
+                context.sendMessage(MessageType.ERROR, e.getMessage());
+            } catch (MalformedURLException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
                 context.sendMessage(MessageType.ERROR, e.getMessage());
             }
@@ -135,10 +138,8 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
                 return new File(dir, name).isFile();
             }
         };
-
         return workingDirDpu.listFiles(directoryFilter);
     }
-
 
     @Override
     public AbstractConfigDialog<CsvProcurementsExtractorConfig> getConfigurationDialog() {
