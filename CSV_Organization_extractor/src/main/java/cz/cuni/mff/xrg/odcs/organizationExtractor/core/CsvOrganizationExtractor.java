@@ -3,8 +3,13 @@ package cz.cuni.mff.xrg.odcs.organizationExtractor.core;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
+import cz.cuni.mff.xrg.odcs.commons.module.file.Directory;
+import cz.cuni.mff.xrg.odcs.commons.module.file.FileManager;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,13 +74,12 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
         try {
             AbstractDatanestHarvester<?> harvester = null;
             URL sourceUrl = getSourceUrl(sourceCSV);
-            File workingDirDpu = getWorkingDirDpu(context);
+            File workingDirDpu = getGlobalDirDpu(context);
             LOG.debug("path: {}", workingDirDpu.getAbsolutePath());
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, workingDirDpu);
             File[] files = getFiles(workingDirDpu);
             exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
-            long triplesCount = rdfDataUnit.getTripleCount();
-            LOG.info("A harvesting is successfully finished : " + triplesCount);
+            FileUtils.deleteDirectory(workingDirDpu);
         } catch (Exception e) {
             LOG.error("Error", e);
             context.sendMessage(MessageType.ERROR, e.getMessage());
@@ -83,9 +87,11 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
         }
     }
 
-    private File getWorkingDirDpu(DPUContext context) {
-        File workingDir = context.getWorkingDir();
-        return new File(workingDir.getAbsolutePath() + "/" + MODULE_NAME + "/");
+    private File getGlobalDirDpu(DPUContext context) throws IOException {
+        FileManager fileManager = new FileManager(context);
+        String s = context.getGlobalDirectory().getAbsolutePath() + File.separator + MODULE_NAME + File.separator;
+
+        return new File(s);
     }
 
     private URL getSourceUrl(String sourceCSV) {
@@ -98,7 +104,7 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
         return url;
     }
 
-    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu)  {
+    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu) {
         AbstractDatanestHarvester<?> harvester;
         try {
             harvester = new OrganizationsDatanestHarvester(workingDirDpu.getAbsolutePath());
@@ -117,12 +123,20 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
             HandlerExtractType handlerExtractType, File[] files) {
         for (File tmpRdf : files) {
             try {
-                rdfDataUnit.extractFromFile(extractType, format, tmpRdf.getAbsolutePath(), fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
-                tmpRdf.deleteOnExit();
+                if (tmpRdf.exists()) {
+                    String path = tmpRdf.toURI().toURL().toExternalForm();
+                    LOG.debug("rdf file: " + path);
+                    rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
+                }
             } catch (RDFException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
                 context.sendMessage(MessageType.ERROR, e.getMessage());
+            } catch (MalformedURLException e) {
+                LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
+                context.sendMessage(MessageType.ERROR, e.getMessage());
             }
+            long triplesCount = rdfDataUnit.getTripleCount();
+            LOG.info("A harvesting is successfully finished : " + triplesCount);
         }
     }
 
@@ -133,7 +147,6 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
                 return new File(dir, name).isFile();
             }
         };
-
         return workingDirDpu.listFiles(directoryFilter);
     }
 
