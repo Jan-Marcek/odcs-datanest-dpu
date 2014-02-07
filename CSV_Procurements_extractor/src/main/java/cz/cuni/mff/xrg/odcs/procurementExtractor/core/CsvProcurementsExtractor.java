@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.io.FileUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,7 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, workingDirDpu);
             File[] files = getFiles(workingDirDpu);
             exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
+            FileUtils.deleteDirectory(workingDirDpu);
             long triplesCount = rdfDataUnit.getTripleCount();
             LOG.info("A harvesting is successfully finished : " + triplesCount);
         } catch (Exception e) {
