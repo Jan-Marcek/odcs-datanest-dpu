@@ -1,19 +1,18 @@
 package cz.cuni.mff.xrg.odcs.organizationExtractor.datanest;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Date;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
-
+import cz.cuni.mff.xrg.odcs.organizationExtractor.data.OrganizationRecord;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.repository.FileSystemRepository;
+import cz.cuni.mff.xrg.odcs.organizationExtractor.serialization.OrganizationRdfSerializer;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cuni.mff.xrg.odcs.organizationExtractor.data.OrganizationRecord;
-import cz.cuni.mff.xrg.odcs.organizationExtractor.serialization.OrganizationRdfSerializer;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
 
 public class OrganizationsDatanestHarvester extends AbstractDatanestHarvester<OrganizationRecord> {
     public final static String KEY_DATANEST_ORGANIZATIONS_URL_KEY = "datanest.organizations.url";
@@ -21,7 +20,7 @@ public class OrganizationsDatanestHarvester extends AbstractDatanestHarvester<Or
     protected final static int ATTR_INDEX_NAME = 1;
     protected final static int ATTR_INDEX_SEAT = 4;
     protected final static int ATTR_INDEX_LEGAL_FORM = 5;
-    protected final static int ATTR_INDEX_ICO = 2;
+    protected final static int ATTR_INDEX_ICO = 3;
     protected final static int ATTR_INDEX_DATE_FROM = 8;
     protected final static int ATTR_INDEX_DATE_TO = 8;
     protected final static int ATTR_INDEX_SOURCE = 14;
@@ -40,12 +39,17 @@ public class OrganizationsDatanestHarvester extends AbstractDatanestHarvester<Or
     @Override
     public OrganizationRecord scrapOneRecord(String[] row) throws ParseException {
         OrganizationRecord record = new OrganizationRecord();
-        record.setId("org_" + row[ATTR_INDEX_ID]);
+        String tmp = StringEscapeUtils.escapeXml(row[ATTR_INDEX_NAME]);
+        String name = StringUtils.stripAccents(tmp);
+        String legalForm = StringUtils.stripAccents(row[ATTR_INDEX_LEGAL_FORM]);
+        String seat = StringUtils.stripAccents(row[ATTR_INDEX_SEAT]);
+
+        record.setId("org_" + row[ATTR_INDEX_ICO]);
         record.setDatanestId(row[ATTR_INDEX_ID]);
         record.setSource(row[ATTR_INDEX_SOURCE]);
-        record.setName(StringEscapeUtils.escapeXml(row[ATTR_INDEX_NAME]));
-        record.setLegalForm(row[ATTR_INDEX_LEGAL_FORM]);
-        record.setSeat(row[ATTR_INDEX_SEAT]);
+        record.setName(name);
+        record.setLegalForm(legalForm);
+        record.setSeat(seat);
         record.setIco(row[ATTR_INDEX_ICO]);
         Date dateFrom;
         try {

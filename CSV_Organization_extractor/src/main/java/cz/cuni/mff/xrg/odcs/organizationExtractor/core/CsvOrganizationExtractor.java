@@ -5,11 +5,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import cz.cuni.mff.xrg.odcs.commons.module.file.Directory;
-import cz.cuni.mff.xrg.odcs.commons.module.file.FileManager;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +20,7 @@ import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.AsExtractor;
 import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.OutputDataUnit;
 import cz.cuni.mff.xrg.odcs.commons.message.MessageType;
 import cz.cuni.mff.xrg.odcs.commons.module.dpu.ConfigurableBase;
+import cz.cuni.mff.xrg.odcs.commons.module.file.FileManager;
 import cz.cuni.mff.xrg.odcs.commons.web.AbstractConfigDialog;
 import cz.cuni.mff.xrg.odcs.commons.web.ConfigDialogProvider;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.datanest.AbstractDatanestHarvester;
@@ -70,20 +70,33 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
         LOG.debug("baseURI: {}", baseURI);
         LOG.debug("onlyThisSuffix: {}", onlyThisSuffix);
         LOG.debug("useStatisticHandler: {}", useStatisticHandler);
-
+        File rdfDirectory = null;
         try {
+            File globalDirectory  = context.getGlobalDirectory();
+            Path path = globalDirectory.toPath();
+            Path  rdfsPath = Files.createTempDirectory(path, "");
+            LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
+            rdfDirectory = rdfsPath.toFile();
             AbstractDatanestHarvester<?> harvester = null;
             URL sourceUrl = getSourceUrl(sourceCSV);
-            File workingDirDpu = getGlobalDirDpu(context);
-            LOG.debug("path: {}", workingDirDpu.getAbsolutePath());
-            performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, workingDirDpu);
-            File[] files = getFiles(workingDirDpu);
+            performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
+            File[] files = getFiles(rdfDirectory);
             exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
-            FileUtils.deleteDirectory(workingDirDpu);
         } catch (Exception e) {
             LOG.error("Error", e);
             context.sendMessage(MessageType.ERROR, e.getMessage());
             throw new DPUException(e.getMessage(), e);
+        } finally {
+            try {
+                if(rdfDirectory != null) {
+                    FileUtils.deleteDirectory(rdfDirectory);
+                }
+            } catch (IOException e) {
+                LOG.error("Error", e);
+                context.sendMessage(MessageType.ERROR, e.getMessage());
+                throw new DPUException(e.getMessage(), e);
+            }
+
         }
     }
 
