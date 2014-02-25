@@ -100,12 +100,6 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
         }
     }
 
-    private File getGlobalDirDpu(DPUContext context) throws IOException {
-        FileManager fileManager = new FileManager(context);
-        String s = context.getGlobalDirectory().getAbsolutePath() + File.separator + MODULE_NAME + File.separator;
-
-        return new File(s);
-    }
 
     private URL getSourceUrl(String sourceCSV) {
         URL url = null;
