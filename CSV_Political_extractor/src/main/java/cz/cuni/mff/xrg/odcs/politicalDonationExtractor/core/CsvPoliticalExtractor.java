@@ -5,6 +5,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.openrdf.rio.RDFFormat;
@@ -65,16 +67,20 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
         LOG.debug("baseURI: {}", baseURI);
         LOG.debug("onlyThisSuffix: {}", onlyThisSuffix);
         LOG.debug("useStatisticHandler: {}", useStatisticHandler);
+        File rdfDirectory = null;
 
         try {
             AbstractDatanestHarvester<?> harvester = null;
             URL sourceUrl = getSourceUrl(sourceCSV);
-            File workingDirDpu = getWorkingDirDpu(context);
-            LOG.debug("path: {}", workingDirDpu.getAbsolutePath());
-            performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, workingDirDpu);
-            File[] files = getFiles(workingDirDpu);
+            File globalDirectory  = context.getGlobalDirectory();
+            Path path = globalDirectory.toPath();
+            Path  rdfsPath = Files.createTempDirectory(path, "");
+            LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
+            rdfDirectory = rdfsPath.toFile();
+            performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
+            File[] files = getFiles(rdfDirectory);
             exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
-            FileUtils.deleteDirectory(workingDirDpu);
+            FileUtils.deleteDirectory(rdfDirectory);
             long triplesCount = rdfDataUnit.getTripleCount();
             LOG.info("A harvesting is successfully finished : " + triplesCount);
         } catch (Exception e) {
