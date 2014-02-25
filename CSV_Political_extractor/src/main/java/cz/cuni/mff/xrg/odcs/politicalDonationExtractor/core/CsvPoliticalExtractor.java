@@ -90,10 +90,6 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
         }
     }
 
-    private File getWorkingDirDpu(DPUContext context) {
-        File workingDir = context.getWorkingDir();
-        return new File(workingDir.getAbsolutePath() + "/" + MODULE_NAME + "/");
-    }
 
     private URL getSourceUrl(String sourceCSV) {
         URL url = null;
