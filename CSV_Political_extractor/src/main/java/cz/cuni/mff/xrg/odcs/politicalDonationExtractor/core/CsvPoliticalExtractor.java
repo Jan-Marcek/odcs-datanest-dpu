@@ -70,11 +70,10 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
         File rdfDirectory = null;
 
         try {
-            AbstractDatanestHarvester<?> harvester = null;
             URL sourceUrl = getSourceUrl(sourceCSV);
             File globalDirectory  = context.getGlobalDirectory();
             Path path = globalDirectory.toPath();
-            Path  rdfsPath = Files.createTempDirectory(path, "");
+            Path rdfsPath = Files.createTempDirectory(path, "");
             LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
             rdfDirectory = rdfsPath.toFile();
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);

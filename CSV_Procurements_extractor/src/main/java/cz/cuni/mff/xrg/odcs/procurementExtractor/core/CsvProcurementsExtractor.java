@@ -75,7 +75,6 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
             Path  rdfsPath = Files.createTempDirectory(path, "");
             LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
             rdfDirectory = rdfsPath.toFile();
-            AbstractDatanestHarvester<?> harvester = null;
             URL sourceUrl = getSourceUrl(sourceCSV);
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
             File[] files = getFiles(rdfDirectory);

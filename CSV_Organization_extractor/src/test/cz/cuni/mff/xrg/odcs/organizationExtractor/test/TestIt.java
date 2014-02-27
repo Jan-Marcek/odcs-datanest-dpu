@@ -28,7 +28,7 @@ public class TestIT {
 
         } finally {
             // release resources
-            //env.release();
+            env.release();
         }
     }
 }
