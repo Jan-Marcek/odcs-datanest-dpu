@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 .idea
 CSV_Organization_extractor/target/
 =======
@@ -9,3 +10,10 @@ CSV_Organization_extractor/target/
 CSV_Procurements_extractor/.idea
 CSV_Procurements_extractor/target/
 >>>>>>> procurements_dpu
+=======
+CSV_Organization_extractor/.idea/
+CSV_Organization_extractor/target/
+CSV_Political_extractor/.idea
+CSV_Political_extractor/target/
+CSV_Procurements_extractor/.idea
+>>>>>>> political_dpu
