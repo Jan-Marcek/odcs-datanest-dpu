@@ -14,13 +14,7 @@
 
 	<!-- list of core modules -->
 	<modules>
-		<module>File_extractor</module>
-		<module>File_loader</module>
-		<module>RDF_extractor</module>
-		<module>RDF_loader</module>
-		<module>SPARQL_transformer</module>
-		<module>RDF_Data_Validator</module>
-		<module>Silk_Linker</module>
+	
 		<module>CSV_Organization_extractor</module>
 		<module>CSV_Procurements_extractor</module>
 		<module>CSV_Political_extractor</module>

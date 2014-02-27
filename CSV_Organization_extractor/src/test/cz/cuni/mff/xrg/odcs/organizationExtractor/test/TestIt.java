@@ -1,16 +1,12 @@
-package cz.cuni.mff.xrg.odcs.extractor.test;
+package cz.cuni.mff.xrg.odcs.organizationExtractor.test;
 
-import cz.cuni.mff.xrg.odcs.commons.configuration.ConfigException;
 import cz.cuni.mff.xrg.odcs.dpu.test.TestEnvironment;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.core.CsvOrganizationExtractor;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.core.CsvOrganizationExtractorConfig;
 import cz.cuni.mff.xrg.odcs.rdf.exceptions.RDFException;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-public class Test {
+public class TestIT {
 
     @org.junit.Test
     public void test() throws Exception, RDFException {

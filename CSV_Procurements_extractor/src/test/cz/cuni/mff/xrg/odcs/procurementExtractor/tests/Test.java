@@ -1,22 +1,21 @@
-package cz.cuni.mff.xrg.odcs.extractor;
+package cz.cuni.mff.xrg.odcs.procurementExtractor.tests;
 
 import cz.cuni.mff.xrg.odcs.commons.configuration.ConfigException;
 import cz.cuni.mff.xrg.odcs.dpu.test.TestEnvironment;
-import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.core.CsvPoliticalExtractor;
-import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.core.CsvPoliticalExtractorConfig;
+import cz.cuni.mff.xrg.odcs.procurementExtractor.core.CsvProcurementsExtractor;
+import cz.cuni.mff.xrg.odcs.procurementExtractor.core.CsvProcurementsExtractorConfig;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 public class Test {
 
     @org.junit.Test
     public void test() throws ConfigException {
-        CsvPoliticalExtractor extractor = new CsvPoliticalExtractor();
-        CsvPoliticalExtractorConfig config = new CsvPoliticalExtractorConfig();
+        CsvProcurementsExtractor extractor = new CsvProcurementsExtractor();
+        CsvProcurementsExtractorConfig config = new CsvProcurementsExtractorConfig();
         config.DebugProcessOnlyNItems = 10;
         extractor.configureDirectly(config);
 
         TestEnvironment env = TestEnvironment.create();
-
         try {
             RDFDataUnit output = env.createRdfOutput("output", false);
             // run the execution
