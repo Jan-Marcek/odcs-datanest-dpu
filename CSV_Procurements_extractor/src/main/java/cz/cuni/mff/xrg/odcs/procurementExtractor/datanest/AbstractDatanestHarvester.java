@@ -109,7 +109,7 @@ public abstract class AbstractDatanestHarvester<RecordType extends AbstractRecor
                     // report current harvesting status
                     timeCurrent = Calendar.getInstance().getTimeInMillis();
                     float harvestingSpeed = 1000f * (float) recordCounter / (float) (timeCurrent - timeStart);
-                    LOG.info("harvested " + recordCounter + " records (" + harvestingSpeed + "/s) so far ...");
+                    LOG.debug("harvested " + recordCounter + " records (" + harvestingSpeed + "/s) so far ...");
 
                     records.clear();
                 }

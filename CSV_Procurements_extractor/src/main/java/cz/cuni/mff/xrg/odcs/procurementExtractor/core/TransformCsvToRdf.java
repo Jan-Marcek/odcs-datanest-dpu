@@ -258,7 +258,7 @@ public class TransformCsvToRdf {
             BufferedWriter out = new BufferedWriter(new FileWriter(dumpFile));
             out.write(rdfData);
             out.close();
-            LOG.info("RDF dump saved to file " + dumpFile);
+            LOG.debug("RDF dump saved to file " + dumpFile);
         } catch (IOException e) {
             LOG.error("IO exception", e);
         }
