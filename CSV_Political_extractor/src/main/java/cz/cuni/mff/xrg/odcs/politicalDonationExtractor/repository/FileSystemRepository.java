@@ -2,13 +2,12 @@ package cz.cuni.mff.xrg.odcs.politicalDonationExtractor.repository;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Properties;
 
-import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.core.CsvPoliticalExtractor;
-import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.data.RdfData;
 import org.openrdf.repository.http.HTTPRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.data.RdfData;
 
 public class FileSystemRepository implements OdnRepositoryStoreInterface<RdfData> {
 
@@ -30,19 +29,7 @@ public class FileSystemRepository implements OdnRepositoryStoreInterface<RdfData
      *             when error occurs while loading properties
      */
     private FileSystemRepository() throws IOException {
-
-        Properties prop = new Properties();
-        try {
-            // load a properties file from class path, inside static method
-            prop.load(CsvPoliticalExtractor.class.getClassLoader().getResourceAsStream("config.properties"));
-            // get the property value and print it out
-            String target = prop.getProperty("targetRDF");
-            setTargetRDF(target);
-            logger.debug("targetRDF is: " + target);
-
-        } catch (IOException e) {
-            logger.error("error was occoured while it was reading property file", e);
-        }
+        logger.debug("FileSystemRepository targetRDF is: " + this.getTargetRDF());
 
     }
 

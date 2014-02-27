@@ -37,7 +37,6 @@ import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtractorConfig> implements ConfigDialogProvider<CsvPoliticalExtractorConfig> {
 
     private final Logger LOG = LoggerFactory.getLogger(CsvPoliticalExtractor.class);
-    public final static String MODULE_NAME = "Csv_Political_Extractor";
 
     public CsvPoliticalExtractor() {
         super(CsvPoliticalExtractorConfig.class);

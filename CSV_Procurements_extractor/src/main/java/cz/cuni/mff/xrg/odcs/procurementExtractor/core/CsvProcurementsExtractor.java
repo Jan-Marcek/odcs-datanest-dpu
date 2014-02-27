@@ -33,10 +33,10 @@ import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 /**
  * @author Jan Marcek
  */
+
 @AsExtractor
 public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsExtractorConfig> implements ConfigDialogProvider<CsvProcurementsExtractorConfig> {
 
-    public final static String MODULE_NAME = "Csv_Procurements_Extractor";
     private final Logger LOG = LoggerFactory.getLogger(CsvProcurementsExtractor.class);
 
     @OutputDataUnit

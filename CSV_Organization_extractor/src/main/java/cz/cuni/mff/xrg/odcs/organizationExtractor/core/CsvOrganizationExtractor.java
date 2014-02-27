@@ -38,7 +38,6 @@ import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 @AsExtractor
 public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationExtractorConfig> implements ConfigDialogProvider<CsvOrganizationExtractorConfig> {
 
-    public final static String MODULE_NAME = "Csv_Organization_Extractor";
     private final Logger LOG = LoggerFactory.getLogger(CsvOrganizationExtractor.class);
 
     @OutputDataUnit
