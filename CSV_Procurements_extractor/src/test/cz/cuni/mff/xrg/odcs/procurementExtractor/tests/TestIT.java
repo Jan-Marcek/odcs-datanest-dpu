@@ -6,7 +6,7 @@ import cz.cuni.mff.xrg.odcs.procurementExtractor.core.CsvProcurementsExtractor;
 import cz.cuni.mff.xrg.odcs.procurementExtractor.core.CsvProcurementsExtractorConfig;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
-public class TestIT {
+public class TestIt {
 
     @org.junit.Test
     public void test() throws ConfigException {
