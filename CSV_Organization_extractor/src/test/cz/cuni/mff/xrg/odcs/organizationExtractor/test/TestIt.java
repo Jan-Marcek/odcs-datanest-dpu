@@ -13,7 +13,10 @@ public class TestIT {
         CsvOrganizationExtractor extractor = new CsvOrganizationExtractor();
         CsvOrganizationExtractorConfig config = new CsvOrganizationExtractorConfig();
         config.DebugProcessOnlyNItems = 10;
-        config.Path = "http://localhost:8000/organization_small.csv";
+        String fileUrl = "file:\\e:\\eea\\comsode\\dataset\\org\\organization_small.csv";
+        String remoteUrl = "http://localhost:8000/organization_small.csv";
+        config.Path = fileUrl;
+
 
         extractor.configureDirectly(config);
 

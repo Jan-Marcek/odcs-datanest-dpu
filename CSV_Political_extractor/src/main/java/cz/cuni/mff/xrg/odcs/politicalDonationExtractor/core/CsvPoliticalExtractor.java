@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import cz.cuni.mff.xrg.odcs.commons.configuration.ConfigException;
 import org.apache.commons.io.FileUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
@@ -118,13 +119,10 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
             HandlerExtractType handlerExtractType, File[] files) {
         for (File tmpRdf : files) {
             try {
-                String path = tmpRdf.toURI().toURL().toExternalForm();
+                String path = tmpRdf.getAbsolutePath();
                 LOG.debug("rdf file: " + path);
                 rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
             } catch (RDFException e) {
-                LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
-                context.sendMessage(MessageType.ERROR, e.getMessage());
-            } catch (MalformedURLException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
                 context.sendMessage(MessageType.ERROR, e.getMessage());
             }
@@ -141,6 +139,7 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
 
         return workingDirDpu.listFiles(directoryFilter);
     }
+
 
     @Override
     public AbstractConfigDialog<CsvPoliticalExtractorConfig> getConfigurationDialog() {

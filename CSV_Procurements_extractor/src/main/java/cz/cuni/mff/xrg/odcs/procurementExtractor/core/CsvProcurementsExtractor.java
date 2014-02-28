@@ -120,14 +120,11 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
         for (File tmpRdf : files) {
             try {
                 if (tmpRdf.exists()) {
-                    String path = tmpRdf.toURI().toURL().toExternalForm();
+                    String path = tmpRdf.getAbsolutePath();
                     LOG.debug("rdf file: " + path);
                     rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
                 }
             } catch (RDFException e) {
-                LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
-                context.sendMessage(MessageType.ERROR, e.getMessage());
-            } catch (MalformedURLException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
                 context.sendMessage(MessageType.ERROR, e.getMessage());
             }

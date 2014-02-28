@@ -432,7 +432,7 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
 
                     extractType = FileExtractType.PATH_TO_FILE;
 
-                    textFieldPath.setInputPrompt("file:\\C:\\ted\\test.ttl");
+                    textFieldPath.setInputPrompt("C:\\ted\\test.ttl");
 
                     // Adding component for specify path to file
                     gridLayoutCore.addComponent(textFieldPath, 0, 1);
@@ -500,7 +500,7 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
     }
 
     private void prepareDirectoryForm() {
-        textFieldPath.setInputPrompt("file:\\C:\\ted\\");
+        textFieldPath.setInputPrompt("C:\\ted\\");
 
         // Adding component for specify path to directory
         gridLayoutCore.addComponent(textFieldPath, 0, 1);

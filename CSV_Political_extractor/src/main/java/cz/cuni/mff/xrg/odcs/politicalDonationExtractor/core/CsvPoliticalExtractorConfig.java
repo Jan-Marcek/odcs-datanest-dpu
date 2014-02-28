@@ -11,8 +11,9 @@ import cz.cuni.mff.xrg.odcs.rdf.enums.RDFFormatType;
  * 
  */
 public class CsvPoliticalExtractorConfig extends DPUConfigObjectBase {
-
-    public String Path = "file:/e:/eea/comsode/dataset/political-dump.csv";
+    String url = "http://datanest.fair-play.sk/api/dataset_records?api_key=eddaabe314eed7aafe05daac294288b8cc4fc0f3&dataset_id=32";
+    String file = "file:/e:/eea/comsode/dataset/political-dump.csv";
+    public String Path = url;
     public RDFFormatType RDFFormatValue = RDFFormatType.AUTO;
     public String FileSuffix = "";
 

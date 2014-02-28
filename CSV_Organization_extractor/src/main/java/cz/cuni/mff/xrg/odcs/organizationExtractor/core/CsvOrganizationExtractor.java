@@ -75,7 +75,6 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
             Path  rdfsPath = Files.createTempDirectory(path, "");
             LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
             rdfDirectory = rdfsPath.toFile();
-            AbstractDatanestHarvester<?> harvester = null;
             URL sourceUrl = getSourceUrl(sourceCSV);
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
             File[] files = getFiles(rdfDirectory);
@@ -129,14 +128,11 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
         for (File tmpRdf : files) {
             try {
                 if (tmpRdf.exists()) {
-                    String path = tmpRdf.toURI().toURL().toExternalForm();
+                    String path = tmpRdf.getAbsolutePath();
                     LOG.debug("rdf file: " + path);
                     rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
                 }
             } catch (RDFException e) {
-                LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
-                context.sendMessage(MessageType.ERROR, e.getMessage());
-            } catch (MalformedURLException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
                 context.sendMessage(MessageType.ERROR, e.getMessage());
             }

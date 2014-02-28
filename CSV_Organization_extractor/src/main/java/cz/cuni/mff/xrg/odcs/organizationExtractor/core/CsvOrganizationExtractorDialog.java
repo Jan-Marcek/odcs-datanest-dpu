@@ -436,7 +436,7 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
 
                     extractType = FileExtractType.PATH_TO_FILE;
 
-                    textFieldPath.setInputPrompt("file:\\C:\\ted\\test.ttl");
+                    textFieldPath.setInputPrompt("C:\\ted\\test.ttl");
 
                     // Adding component for specify path to file
                     gridLayoutCore.addComponent(textFieldPath, 0, 1);
@@ -512,7 +512,7 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
     }
 
     private void prepareDirectoryForm() {
-        textFieldPath.setInputPrompt("file:\\C:\\ted\\");
+        textFieldPath.setInputPrompt("C:\\ted\\");
 
         // Adding component for specify path to directory
         gridLayoutCore.addComponent(textFieldPath, 0, 1);

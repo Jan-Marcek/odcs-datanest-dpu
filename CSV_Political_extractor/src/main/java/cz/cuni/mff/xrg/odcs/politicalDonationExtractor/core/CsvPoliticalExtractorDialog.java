@@ -431,7 +431,7 @@ public class CsvPoliticalExtractorDialog extends BaseConfigDialog<CsvPoliticalEx
 
                     extractType = FileExtractType.PATH_TO_FILE;
 
-                    textFieldPath.setInputPrompt("file:\\C:\\ted\\test.ttl");
+                    textFieldPath.setInputPrompt("C:\\ted\\test.ttl");
 
                     // Adding component for specify path to file
                     gridLayoutCore.addComponent(textFieldPath, 0, 1);
