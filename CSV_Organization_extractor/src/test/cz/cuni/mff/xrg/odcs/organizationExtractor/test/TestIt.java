@@ -6,7 +6,7 @@ import cz.cuni.mff.xrg.odcs.organizationExtractor.core.CsvOrganizationExtractorC
 import cz.cuni.mff.xrg.odcs.rdf.exceptions.RDFException;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
-public class TestIT {
+public class TestIt {
 
     @org.junit.Test
     public void test() throws Exception, RDFException {
