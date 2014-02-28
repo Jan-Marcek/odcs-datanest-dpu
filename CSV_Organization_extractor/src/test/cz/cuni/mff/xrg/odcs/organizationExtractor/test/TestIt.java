@@ -15,7 +15,7 @@ public class TestIt {
         config.DebugProcessOnlyNItems = 10;
         String fileUrl = "file:\\e:\\eea\\comsode\\dataset\\org\\organization_small.csv";
         String remoteUrl = "http://localhost:8000/organization_small.csv";
-        config.Path = fileUrl;
+        config.Path = remoteUrl;
 
 
         extractor.configureDirectly(config);
