@@ -97,6 +97,8 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
 
     private URL getSourceUrl(String sourceCSV, FileExtractType extractType) {
         URL url = null;
+        LOG.debug("sourceCSV: " + sourceCSV);
+
         try {
             switch (extractType) {
             case HTTP_URL:
@@ -104,11 +106,11 @@ public class CsvOrganizationExtractor extends ConfigurableBase<CsvOrganizationEx
                 url = new URL(sourceCSV);
                 break;
             case UPLOAD_FILE:
-                File file = new File(sourceCSV);
-                url = file.toURI().toURL();
+                url  = new URL ("file:" + sourceCSV);
+
                 break;
             }
-            LOG.debug("url: " + url.toString());
+            LOG.debug("url: " + url.toExternalForm());
         } catch (IOException e) {
             LOG.error("An error occoured when path: " + sourceCSV + " was parsing.", e);
         }

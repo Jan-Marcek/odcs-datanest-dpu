@@ -14,11 +14,11 @@ public class TestIt {
         CsvOrganizationExtractor extractor = new CsvOrganizationExtractor();
         CsvOrganizationExtractorConfig config = new CsvOrganizationExtractorConfig();
         config.DebugProcessOnlyNItems = 10;
-        String fileUrl = "file:\\e:\\eea\\comsode\\dataset\\org\\organization_small.csv";
+        String fileUrl = "file:/e:/eea/comsode/dataset/org/organization_small.csv";
         String remoteUrl = "http://localhost:8000/organization_small.csv";
-        config.Path = remoteUrl;
+        config.Path = fileUrl;
 
-        config.fileExtractType = FileExtractType.HTTP_URL;
+        config.fileExtractType = FileExtractType.UPLOAD_FILE;
         extractor.configureDirectly(config);
 
         TestEnvironment env = TestEnvironment.create();

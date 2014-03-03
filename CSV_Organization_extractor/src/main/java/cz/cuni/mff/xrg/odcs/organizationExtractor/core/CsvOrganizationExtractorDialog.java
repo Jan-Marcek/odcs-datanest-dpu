@@ -1,6 +1,7 @@
 package cz.cuni.mff.xrg.odcs.organizationExtractor.core;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -45,11 +46,16 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
     /**
      * TextField for set file extension that will be processed in some directory. Uses in case of FileExtractType.PATH_TO_DIRECTORY of {@link #pathType}
      */
+    private TextField textFieldOnly;
+
+    private OptionGroup directoryGroup;
 
     /**
      * TextField to set destination of the file
      */
     private TextField textFieldPath;
+
+    private VerticalLayout verticalLayoutOnly;
 
     private HorizontalLayout horizontalLayoutFormat;
 
@@ -86,6 +92,10 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
 
     private static final String CONTINUE = "Extract only triples with no errors. " + "\nIf fatal error is discovered, pipeline is stopped.";
 
+    private static final String FILE_SKIP = "When there is a problem parsing a file, it is skipped";
+
+    private static final String FILE_ERROR = "When there is a program parsing a file, extraction ends with error";
+
     /**
      * Basic constructor.
      */
@@ -101,7 +111,7 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
      * Initialization of Configuration dialog for DPU RDF File Extractor
      */
     private void initialize() {
-        extractType = FileExtractType.PATH_TO_FILE;
+        extractType = FileExtractType.UPLOAD_FILE;
         ex = new InvalidValueException("Valid");
     }
 
@@ -116,7 +126,8 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
         }
 
         comboBoxFormat.setValue(RDFFormatType.getStringValue(RDFFormatType.AUTO));
-//        pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.UPLOAD_FILE));
+
+        pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.UPLOAD_FILE));
         pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_FILE));
         // pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY));
         pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.HTTP_URL));
@@ -189,6 +200,7 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
      */
     @Override
     public void setConfiguration(CsvOrganizationExtractorConfig conf) {
+        extractType = conf.fileExtractType;
 
         pathType.setValue(FileExtractType.getDescriptionByType(extractType));
         String path = conf.Path.trim();
@@ -196,7 +208,20 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
         textFieldDebugProcessOnlyNItems.setValue(String.valueOf(conf.DebugProcessOnlyNItems));
         textFieldBatchSize.setValue(String.valueOf(conf.BatchSize));
 
-        textFieldPath.setValue(path);
+        if (extractType == FileExtractType.UPLOAD_FILE) {
+            File file = new File(path);
+            String filename = file.getName();
+
+            fileUploadReceiver.setFileName(filename);
+            fileUploadReceiver.setPath(path);
+
+            textFieldPath.setReadOnly(false); // allow value settings
+            textFieldPath.setValue(filename.trim()); // set value
+            textFieldPath.setReadOnly(true); // forbid
+
+        } else {
+            textFieldPath.setValue(path);
+        }
 
         String formatValue = RDFFormatType.getStringValue(conf.RDFFormatValue);
 
@@ -368,7 +393,68 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
                 });
 
                 // If selected "Extract uploaded file" option
-                if (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_FILE))) {
+                if (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.UPLOAD_FILE))) {
+
+                    extractType = FileExtractType.UPLOAD_FILE;
+
+                    // Upload component
+                    fileUpload = new Upload("", fileUploadReceiver);
+                    fileUpload.setImmediate(true);
+                    fileUpload.setButtonCaption("Choose file");
+                    // Upload started event listener
+                    fileUpload.addStartedListener(new StartedListener() {
+                        @Override
+                        public void uploadStarted(final StartedEvent event) {
+
+                            if (uploadInfoWindow.getParent() == null) {
+                                UI.getCurrent().addWindow(uploadInfoWindow);
+                            }
+                            uploadInfoWindow.setClosable(false);
+
+                        }
+                    });
+                    // Upload received event listener.
+                    fileUpload.addFinishedListener(new Upload.FinishedListener() {
+                        @Override
+                        public void uploadFinished(final FinishedEvent event) {
+
+                            uploadInfoWindow.setClosable(true);
+                            uploadInfoWindow.close();
+                            // If upload wasn't interrupt by user
+                            if (fl == 0) {
+                                textFieldPath.setReadOnly(false);
+                                // File was upload to the temp folder.
+                                // Path to this file is setting to the textFieldPath field
+                                textFieldPath.setValue(fileUploadReceiver.getFileName());
+                                textFieldPath.setReadOnly(true);
+                            } // If upload was interrupt by user
+                            else {
+                                textFieldPath.setReadOnly(false);
+                                textFieldPath.setValue("");
+                                textFieldPath.setReadOnly(true);
+                                fl = 0;
+                            }
+                        }
+                    });
+
+                    // The window with upload information
+                    uploadInfoWindow = new UploadInfoWindow(fileUpload);
+
+                    HorizontalLayout uploadFileLayout = new HorizontalLayout();
+                    uploadFileLayout.setWidth("100%");
+                    uploadFileLayout.setSpacing(true);
+
+                    textFieldPath.setReadOnly(true);
+                    uploadFileLayout.addComponent(fileUpload);
+                    uploadFileLayout.addComponent(textFieldPath);
+                    uploadFileLayout.setExpandRatio(fileUpload, 0.2f);
+                    uploadFileLayout.setExpandRatio(textFieldPath, 0.8f);
+
+                    // Adding uploading component
+                    gridLayoutCore.addComponent(uploadFileLayout, 0, 1);
+
+                    // If selected "Extract file based on the path to file" option
+                } else if (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_FILE))) {
 
                     extractType = FileExtractType.PATH_TO_FILE;
 
@@ -377,6 +463,12 @@ public class CsvOrganizationExtractorDialog extends BaseConfigDialog<CsvOrganiza
                     // Adding component for specify path to file
                     gridLayoutCore.addComponent(textFieldPath, 0, 1);
 
+                    // If selected "Extract file based on the path to the directory" option
+                    // } else if (event.getProperty().getValue().equals(FileExtractType
+                    // .getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY))) {
+                    //
+                    // extractType = FileExtractType.PATH_TO_DIRECTORY;
+                    // prepareDirectoryForm();
 
                 } else if (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.HTTP_URL))) {
 
