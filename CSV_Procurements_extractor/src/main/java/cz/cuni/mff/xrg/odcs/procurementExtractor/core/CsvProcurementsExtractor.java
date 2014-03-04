@@ -3,7 +3,6 @@ package cz.cuni.mff.xrg.odcs.procurementExtractor.core;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,12 +69,12 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
         File rdfDirectory = null;
 
         try {
-            File globalDirectory  = context.getGlobalDirectory();
+            File globalDirectory = context.getGlobalDirectory();
             Path path = globalDirectory.toPath();
-            Path  rdfsPath = Files.createTempDirectory(path, "");
+            Path rdfsPath = Files.createTempDirectory(path, "");
             LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
             rdfDirectory = rdfsPath.toFile();
-            URL sourceUrl = getSourceUrl(sourceCSV);
+            URL sourceUrl = getSourceUrl(sourceCSV, extractType);
             performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
             File[] files = getFiles(rdfDirectory);
             exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
@@ -89,11 +88,22 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
         }
     }
 
-
-    private URL getSourceUrl(String sourceCSV) {
+    private URL getSourceUrl(String sourceCSV, FileExtractType extractType) {
         URL url = null;
+        LOG.debug("sourceCSV: " + sourceCSV);
+
         try {
-            url = new URL(sourceCSV);
+            switch (extractType) {
+            case HTTP_URL:
+            case PATH_TO_FILE:
+                url = new URL(sourceCSV);
+                break;
+            case UPLOAD_FILE:
+                url = new URL("file:" + sourceCSV);
+
+                break;
+            }
+            LOG.debug("url: " + url.toExternalForm());
         } catch (IOException e) {
             LOG.error("An error occoured when path: " + sourceCSV + " was parsing.", e);
         }
@@ -119,8 +129,19 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
             HandlerExtractType handlerExtractType, File[] files) {
         for (File tmpRdf : files) {
             try {
+                String path = null;
                 if (tmpRdf.exists()) {
-                    String path = tmpRdf.getAbsolutePath();
+
+                    switch (extractType) {
+                    case HTTP_URL:
+                        path = tmpRdf.toURI().toString();
+                        break;
+                    case UPLOAD_FILE:
+                    case PATH_TO_FILE:
+                        path = tmpRdf.getAbsolutePath();
+                        break;
+                    }
+
                     LOG.debug("rdf file: " + path);
                     rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
                 }

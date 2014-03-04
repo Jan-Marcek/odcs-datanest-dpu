@@ -27,7 +27,7 @@ public class CsvOrganizationExtractorConfig extends DPUConfigObjectBase {
     public CsvOrganizationExtractorConfig() {
     }
 
-    public String Path = "e:/eea/comsode/rdf/source/organisations-dump.csv";
+    public String Path = "";
     public RDFFormatType RDFFormatValue = RDFFormatType.AUTO;
     public String FileSuffix = "";
 

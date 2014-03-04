@@ -1,6 +1,7 @@
 package cz.cuni.mff.xrg.odcs.procurementExtractor.core;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -24,11 +25,11 @@ import cz.cuni.mff.xrg.odcs.rdf.enums.RDFFormatType;
 
 /**
  * Configuration dialog for DPU RDF File Extractor.
- * 
+ *
  * @author Maria Kukhar
  * @author Jiri Tomes
- * 
- * 
+ *
+ *
  */
 public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurementsExtractorConfig> {
     private GridLayout mainLayout;
@@ -40,27 +41,27 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
 
     private CheckBox useHandler; // Statistical handler
 
-    private CheckBox failWhenErrors; // How to solve errors for Statistical handler
+    private OptionGroup failsWhenErrors; // How to solve errors for Statistical handler
 
     /**
      * TextField for set file extension that will be processed in some directory. Uses in case of FileExtractType.PATH_TO_DIRECTORY of {@link #pathType}
      */
     private TextField textFieldOnly;
 
+    private OptionGroup directoryGroup;
+
     /**
      * TextField to set destination of the file
      */
     private TextField textFieldPath;
 
-    private HorizontalLayout horizontalLayoutOnly;
+    private VerticalLayout verticalLayoutOnly;
 
     private HorizontalLayout horizontalLayoutFormat;
 
     private TextField textFieldDebugProcessOnlyNItems;
 
     private TextField textFieldBatchSize;
-
-
     /**
      * OptionGroup for path type definition
      */
@@ -87,12 +88,20 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
 
     private VerticalLayout verticalLayoutDetails;
 
+    private static final String STOP = "Stop pipeline execution if extractor " + "extracted some triples with an error.";
+
+    private static final String CONTINUE = "Extract only triples with no errors. " + "\nIf fatal error is discovered, pipeline is stopped.";
+
+    private static final String FILE_SKIP = "When there is a problem parsing a file, it is skipped";
+
+    private static final String FILE_ERROR = "When there is a program parsing a file, extraction ends with error";
+
     /**
      * Basic constructor.
      */
     public CsvProcurementsExtractorDialog() {
         super(CsvProcurementsExtractorConfig.class);
-        inicialize();
+        initialize();
         buildMainLayout();
         setCompositionRoot(mainLayout);
         mapData();
@@ -101,7 +110,7 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
     /**
      * Initialization of Configuration dialog for DPU RDF File Extractor
      */
-    private void inicialize() {
+    private void initialize() {
         extractType = FileExtractType.UPLOAD_FILE;
         ex = new InvalidValueException("Valid");
     }
@@ -112,17 +121,15 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
     private void mapData() {
 
         for (RDFFormatType next : RDFFormatType.getListOfRDFType()) {
-            comboBoxFormat.addItem(next);
+            String value = RDFFormatType.getStringValue(next);
+            comboBoxFormat.addItem(value);
         }
 
-        comboBoxFormat.setValue(RDFFormatType.AUTO);
+        comboBoxFormat.setValue(RDFFormatType.getStringValue(RDFFormatType.AUTO));
 
         pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.UPLOAD_FILE));
         pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_FILE));
-        // TODO to extend this functionality
-
-//        pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY));
-//        pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY_SKIP_PROBLEM_FILES));
+        // pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY));
         pathType.addItem(FileExtractType.getDescriptionByType(FileExtractType.HTTP_URL));
 
         pathType.setValue(FileExtractType.getDescriptionByType(extractType));
@@ -134,46 +141,51 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
      * configuring DPU
      *
      * @throws ConfigException
-     *             Exception which might be thrown when field {@link #textFieldPath} contains null value. // * @return conf Object holding configuration which
-     *             is used in {@link #setConfiguration} to initialize fields in the configuration dialog.
+     *             Exception which might be thrown when field {@link #textFieldPath} contains null value.
+     * @return conf Object holding configuration which is used in {@link #setConfiguration} to initialize fields in the configuration dialog.
      */
     @Override
     public CsvProcurementsExtractorConfig getConfiguration() throws ConfigException {
+        if (getContext().isTemplate()) {
+        }
 
         if (!textFieldPath.isValid()) {
             throw new ConfigException(ex.getMessage(), ex);
         } else {
-            CsvProcurementsExtractorConfig conf = new CsvProcurementsExtractorConfig();
 
+            String path;
             if (extractType == FileExtractType.UPLOAD_FILE) {
-                conf.Path = FileUploadReceiver.path + "/" + textFieldPath.getValue().trim();
+                path = fileUploadReceiver.getPath();
 
             } else {
-                conf.Path = textFieldPath.getValue().trim();
+                path = textFieldPath.getValue().trim();
             }
 
-            if (extractType == FileExtractType.PATH_TO_DIRECTORY || extractType == FileExtractType.PATH_TO_DIRECTORY_SKIP_PROBLEM_FILES) {
+            String formatValue = (String) comboBoxFormat.getValue();
 
-                conf.FileSuffix = textFieldOnly.getValue().trim();
+            RDFFormatType RDFFormatValue = RDFFormatType.getTypeByString(formatValue);
+            boolean useStatisticalHandler = useHandler.getValue();
 
-                if (textFieldOnly.getValue().trim().isEmpty()) {
-                    conf.OnlyThisSuffix = false;
-                } else {
-                    conf.OnlyThisSuffix = true;
-                }
+            String selectedValue = (String) failsWhenErrors.getValue();
 
+            boolean failWhenErrors;
+            if (selectedValue.equals(STOP)) {
+                failWhenErrors = true;
+            } else if (selectedValue.endsWith(CONTINUE)) {
+                failWhenErrors = false;
             } else {
-                conf.FileSuffix = "";
-                conf.OnlyThisSuffix = false;
+                throw new ConfigException("No value for case using statistical and error handler");
             }
 
-            conf.RDFFormatValue = (RDFFormatType) comboBoxFormat.getValue();
-            conf.UseStatisticalHandler = useHandler.getValue();
-            conf.failWhenErrors = failWhenErrors.getValue();
-            conf.fileExtractType = extractType;
-            conf.DebugProcessOnlyNItems = Integer.parseInt(textFieldDebugProcessOnlyNItems.getValue().trim());
-            conf.BatchSize = Integer.parseInt(textFieldBatchSize.getValue().trim());
-            return conf;
+            String fileSuffix = "";
+            boolean onlyThisSuffix = false;
+            Integer debugProcessOnlyNItems = Integer.parseInt(textFieldDebugProcessOnlyNItems.getValue().trim());
+            Integer batchSize = Integer.parseInt(textFieldBatchSize.getValue().trim());
+
+            CsvProcurementsExtractorConfig config = new CsvProcurementsExtractorConfig(path, RDFFormatValue, fileSuffix, extractType, onlyThisSuffix,
+                    useStatisticalHandler, failWhenErrors, debugProcessOnlyNItems, batchSize);
+
+            return config;
         }
     }
 
@@ -188,41 +200,52 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
      */
     @Override
     public void setConfiguration(CsvProcurementsExtractorConfig conf) {
-
         extractType = conf.fileExtractType;
+
         pathType.setValue(FileExtractType.getDescriptionByType(extractType));
+        String path = conf.Path.trim();
+
+        textFieldDebugProcessOnlyNItems.setValue(String.valueOf(conf.DebugProcessOnlyNItems));
+        textFieldBatchSize.setValue(String.valueOf(conf.BatchSize));
 
         if (extractType == FileExtractType.UPLOAD_FILE) {
+            File file = new File(path);
+            String filename = file.getName();
 
-            String filepath = conf.Path.trim();
-            String filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length());
+            fileUploadReceiver.setFileName(filename);
+            fileUploadReceiver.setPath(path);
 
             textFieldPath.setReadOnly(false); // allow value settings
             textFieldPath.setValue(filename.trim()); // set value
             textFieldPath.setReadOnly(true); // forbid
 
         } else {
-            textFieldPath.setValue(conf.Path.trim());
+            textFieldPath.setValue(path);
         }
 
-        if (extractType == FileExtractType.PATH_TO_DIRECTORY || extractType == FileExtractType.PATH_TO_DIRECTORY_SKIP_PROBLEM_FILES) {
+        String formatValue = RDFFormatType.getStringValue(conf.RDFFormatValue);
 
-            textFieldOnly.setValue(conf.FileSuffix.trim());
-        }
-
-        comboBoxFormat.setValue(conf.RDFFormatValue);
+        comboBoxFormat.setValue(formatValue);
         useHandler.setValue(conf.UseStatisticalHandler);
-        failWhenErrors.setValue(conf.failWhenErrors);
-        textFieldDebugProcessOnlyNItems.setValue(String.valueOf(conf.DebugProcessOnlyNItems));
-        textFieldBatchSize.setValue(String.valueOf(conf.BatchSize));
+
+        if (conf.failWhenErrors) {
+            failsWhenErrors.setValue(STOP);
+        } else {
+            failsWhenErrors.setValue(CONTINUE);
+        }
 
     }
 
+    /**
+     * Returns desription of file extractor as string.
+     *
+     * @return desription of file extractor as string.
+     */
     @Override
     public String getDescription() {
         String path;
         if (extractType == FileExtractType.UPLOAD_FILE) {
-            path = FileUploadReceiver.path + "/" + textFieldPath.getValue().trim();
+            path = fileUploadReceiver.getPath();
         } else {
             path = textFieldPath.getValue().trim();
         }
@@ -283,19 +306,19 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
         String message = "";
 
         switch (type) {
-        case HTTP_URL:
-            message = "URL path must start with prefix http://";
-            break;
-        case PATH_TO_DIRECTORY:
-        case PATH_TO_DIRECTORY_SKIP_PROBLEM_FILES:
-            message = "Path to directory must be filled, not empty.";
-            break;
-        case PATH_TO_FILE:
-            message = "Path to file must be filled, not empty.";
-            break;
-        case UPLOAD_FILE:
-            message = "Path to upload file must not be empty.";
-            break;
+            case HTTP_URL:
+                message = "URL path must start with prefix http://";
+                break;
+            case PATH_TO_DIRECTORY:
+            case PATH_TO_DIRECTORY_SKIP_PROBLEM_FILES:
+                message = "Path to directory must be filled, not empty.";
+                break;
+            case PATH_TO_FILE:
+                message = "Path to file must be filled, not empty.";
+                break;
+            case UPLOAD_FILE:
+                message = "Path to upload file must not be empty.";
+                break;
         }
 
         return message;
@@ -309,12 +332,15 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
      */
     private GridLayout buildGridLayoutCore() {
         // common part: create layout
-        gridLayoutCore = new GridLayout(1, 6);
+        gridLayoutCore = new GridLayout(1, 7);
         gridLayoutCore.setImmediate(false);
         gridLayoutCore.setWidth("100%");
         gridLayoutCore.setHeight("100%");
         gridLayoutCore.setMargin(true);
         gridLayoutCore.setSpacing(true);
+
+        // create fileUploadReceiver
+        fileUploadReceiver = new FileUploadReceiver();
 
         // OptionGroup for path type definition
         pathType = new OptionGroup();
@@ -351,11 +377,12 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
                                     throw ex;
                                 }
                             } else {
-                                if (stringValue.isEmpty()) {
 
+                                if (!getContext().isTemplate() && stringValue.isEmpty()) {
                                     String message = getValidMessageByFileExtractType(extractType);
                                     ex = new EmptyValueException(message);
                                     throw ex;
+
                                 }
                             }
                         } else {
@@ -369,10 +396,9 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
                 if (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.UPLOAD_FILE))) {
 
                     extractType = FileExtractType.UPLOAD_FILE;
-                    fileUploadReceiver = new FileUploadReceiver();
 
                     // Upload component
-                    fileUpload = new Upload(null, fileUploadReceiver);
+                    fileUpload = new Upload("", fileUploadReceiver);
                     fileUpload.setImmediate(true);
                     fileUpload.setButtonCaption("Choose file");
                     // Upload started event listener
@@ -399,7 +425,7 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
                                 textFieldPath.setReadOnly(false);
                                 // File was upload to the temp folder.
                                 // Path to this file is setting to the textFieldPath field
-                                textFieldPath.setValue(FileUploadReceiver.fileName.toString());
+                                textFieldPath.setValue(fileUploadReceiver.getFileName());
                                 textFieldPath.setReadOnly(true);
                             } // If upload was interrupt by user
                             else {
@@ -436,21 +462,14 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
 
                     // Adding component for specify path to file
                     gridLayoutCore.addComponent(textFieldPath, 0, 1);
-                    // TODO to extend this functionality
 
                     // If selected "Extract file based on the path to the directory" option
-                    // } else if (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY))) {
+                    // } else if (event.getProperty().getValue().equals(FileExtractType
+                    // .getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY))) {
                     //
                     // extractType = FileExtractType.PATH_TO_DIRECTORY;
                     // prepareDirectoryForm();
-                    //
-                    // } else if
-                    // (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.PATH_TO_DIRECTORY_SKIP_PROBLEM_FILES))) {
-                    //
-                    // extractType = FileExtractType.PATH_TO_DIRECTORY_SKIP_PROBLEM_FILES;
-                    // prepareDirectoryForm();
-                    //
-                    // If selected "Extract file from the given HTTP URL" option
+
                 } else if (event.getProperty().getValue().equals(FileExtractType.getDescriptionByType(FileExtractType.HTTP_URL))) {
 
                     extractType = FileExtractType.HTTP_URL;
@@ -479,6 +498,10 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
         horizontalLayoutFormat.addComponent(comboBoxFormat);
 
         gridLayoutCore.addComponent(horizontalLayoutFormat, 0, 3);
+        // horizontalLayoutFormat
+        horizontalLayoutFormat = new HorizontalLayout();
+        horizontalLayoutFormat.setImmediate(false);
+        horizontalLayoutFormat.setSpacing(true);
 
         FormLayout fl = new FormLayout();
         fl.setWidth("100%");
@@ -496,34 +519,8 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
         fl.addComponent(textFieldDebugProcessOnlyNItems);
         fl.addComponent(textFieldBatchSize);
         gridLayoutCore.addComponent(fl, 0, 4);
+
         return gridLayoutCore;
-    }
-
-    private void prepareDirectoryForm() {
-        textFieldPath.setInputPrompt("C:\\ted\\");
-
-        // Adding component for specify path to directory
-        gridLayoutCore.addComponent(textFieldPath, 0, 1);
-
-        // layoutOnly
-
-        horizontalLayoutOnly = new HorizontalLayout();
-        horizontalLayoutOnly.setImmediate(false);
-        horizontalLayoutOnly.setSpacing(true);
-
-        horizontalLayoutOnly.addComponent(new Label("If directory, process only files with extension:"));
-
-        // textFieldOnly
-        textFieldOnly = new TextField("");
-        textFieldOnly.setImmediate(false);
-        textFieldOnly.setWidth("50px");
-        textFieldOnly.setInputPrompt(".ttl");
-        horizontalLayoutOnly.addComponent(textFieldOnly);
-        horizontalLayoutOnly.setComponentAlignment(textFieldOnly, Alignment.TOP_RIGHT);
-
-        // Adding component for specify file extension
-        gridLayoutCore.addComponent(horizontalLayoutOnly, 0, 2);
-
     }
 
     /**
@@ -548,23 +545,34 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
         useHandler.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                if (failWhenErrors != null) {
-                    failWhenErrors.setVisible(useHandler.getValue());
+
+                if (failsWhenErrors != null) {
+                    failsWhenErrors.setEnabled(useHandler.getValue());
                 }
             }
         });
 
-        // How to solve errors for Statistical handler
-        failWhenErrors = new CheckBox("If there is an error in some of the extracted triples," + " extractor ends with an error");
-        failWhenErrors.setValue(false);
-        failWhenErrors.setWidth("-1px");
-        failWhenErrors.setHeight("-1px");
-        failWhenErrors.setVisible(useHandler.getValue());
-
         verticalLayoutDetails.addComponent(useHandler);
-        verticalLayoutDetails.addComponent(failWhenErrors);
+
+        // How to solve errors for Statistical handler
+        failsWhenErrors = new OptionGroup();
+        failsWhenErrors.setImmediate(false);
+        failsWhenErrors.setWidth("-1px");
+        failsWhenErrors.setHeight("-1px");
+        failsWhenErrors.setMultiSelect(false);
+
+        // extract only triples with no errors.
+        failsWhenErrors.addItem(CONTINUE);
+        // stop pipeline execution if extractor extracted some triples with an error.
+        failsWhenErrors.addItem(STOP);
+
+        failsWhenErrors.setValue(CONTINUE);
+        failsWhenErrors.setEnabled(useHandler.getValue());
+
+        verticalLayoutDetails.addComponent(failsWhenErrors);
 
         return verticalLayoutDetails;
+
     }
 }
 
@@ -578,19 +586,17 @@ public class CsvProcurementsExtractorDialog extends BaseConfigDialog<CsvProcurem
  */
 class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.ProgressListener, Upload.FinishedListener {
 
-    private static final long serialVersionUID = 1L;
+    private Label state;
 
-    private final Label state = new Label();
+    private Label fileName;
 
-    private final Label fileName = new Label();
+    private Label textualProgress;
 
-    private final Label textualProgress = new Label();
+    private ProgressBar progress;
 
-    private final ProgressIndicator pi = new ProgressIndicator();
+    private Button cancelButton;
 
-    private final Button cancelButton;
-
-    private final Upload upload;
+    private Upload upload;
 
     /**
      * Basic constructor
@@ -602,7 +608,11 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
 
         super("Status");
         this.upload = nextUpload;
-        this.cancelButton = new Button("Cancel");
+        this.state = new Label();
+        this.fileName = new Label();
+        this.textualProgress = new Label();
+        this.progress = new ProgressBar();
+        cancelButton = new Button("Cancel");
 
         setComponent();
 
@@ -626,8 +636,6 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
             /**
              * Upload interruption
              */
-            private static final long serialVersionUID = 1L;
-
             @Override
             public void buttonClick(final ClickEvent event) {
                 upload.interruptUpload();
@@ -646,9 +654,9 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
         formLayout.addComponent(fileName);
 
         // progress indicator
-        pi.setCaption("Progress");
-        pi.setVisible(false);
-        formLayout.addComponent(pi);
+        progress.setCaption("Progress");
+        progress.setVisible(false);
+        formLayout.addComponent(progress);
 
         textualProgress.setVisible(false);
         formLayout.addComponent(textualProgress);
@@ -664,7 +672,7 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
     @Override
     public void uploadFinished(final FinishedEvent event) {
         state.setValue("Idle");
-        pi.setVisible(false);
+        progress.setVisible(false);
         textualProgress.setVisible(false);
         cancelButton.setVisible(false);
 
@@ -676,9 +684,9 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
     @Override
     public void uploadStarted(final StartedEvent event) {
 
-        pi.setValue(0f);
-        pi.setVisible(true);
-        pi.setPollingInterval(500); // hit server frequantly to get
+        progress.setValue(0f);
+        progress.setVisible(true);
+        progress.getUI().setPollInterval(500); // hit server frequantly to get
         textualProgress.setVisible(true);
         // updates to client
         state.setValue("Uploading");
@@ -693,7 +701,7 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
     @Override
     public void updateProgress(final long readBytes, final long contentLength) {
         // this method gets called several times during the update
-        pi.setValue(new Float(readBytes / (float) contentLength));
+        progress.setValue(new Float(readBytes / (float) contentLength));
         textualProgress.setValue("Processed " + (readBytes / 1024) + " k bytes of " + (contentLength / 1024) + " k");
     }
 }
@@ -706,76 +714,62 @@ class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.
  */
 class FileUploadReceiver implements Receiver {
 
-    private static final long serialVersionUID = 5099459605355200117L;
+    private String path;
 
-    private static final int searchedByte = '\n';
+    private String fileName;
 
-    private static int total = 0;
+    public FileUploadReceiver() {
+        this.path = "";
+        this.fileName = "";
+    }
 
-    private boolean sleep = false;
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-    public static String fileName;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
-    public static File file;
+    public String getPath() {
+        return path;
+    }
 
-    public static Path path;
+    public String getFileName() {
+        return fileName;
+    }
+
+    private Path createDirectoryTempPath() {
+        try {
+            // create template directory
+            Path newPath = Files.createTempDirectory("Upload");
+            return newPath;
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+    }
 
     /**
      * return an OutputStream
      */
     @Override
-    public OutputStream receiveUpload(final String filename, final String MIMEType) {
-        fileName = filename;
+    public OutputStream receiveUpload(final String fileName, final String MIMEType) {
+
+        // path for upload file in temp directory
+        String dirPath = createDirectoryTempPath().toString();
+        File file = new File(dirPath + "/" + fileName);
+
+        setFileName(fileName);
+        setPath(file.getAbsolutePath());
 
         try {
-            // create template directory
-            path = Files.createTempDirectory("Upload");
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-
-        file = new File("/" + path + "/" + filename); // path for upload file in temp directory
-
-        OutputStream fos = null;
-
-        try {
-            final FileOutputStream fstream = new FileOutputStream(file);
-
-            fos = new OutputStream() {
-                @Override
-                public void write(final int b) throws IOException {
-                    total++;
-
-                    fstream.write(b);
-
-                }
-
-                @Override
-                public void write(byte b[], int off, int len) throws IOException {
-                    if (b == null) {
-                        throw new NullPointerException();
-                    } else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
-                        throw new IndexOutOfBoundsException();
-                    } else if (len == 0) {
-                        return;
-                    }
-                    fstream.write(b, off, len);
-                    total += len;
-
-                }
-
-                @Override
-                public void close() throws IOException {
-                    fstream.close();
-                    super.close();
-                }
-            };
+            FileOutputStream fstream = new FileOutputStream(file);
+            return fstream;
 
         } catch (FileNotFoundException e) {
             new Notification("Could not open file<br/>", e.getMessage(), Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
-        } finally {
-            return fos;
-
+            return null;
         }
 
     }
