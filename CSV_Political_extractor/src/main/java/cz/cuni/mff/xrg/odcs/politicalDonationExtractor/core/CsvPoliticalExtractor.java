@@ -74,9 +74,9 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
             Path rdfsPath = Files.createTempDirectory(path, "");
             LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
             rdfDirectory = rdfsPath.toFile();
-            performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
+            performET(batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
             File[] files = getFiles(rdfDirectory);
-            exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
+            exportFiles(baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
             FileUtils.deleteDirectory(rdfDirectory);
             long triplesCount = rdfDataUnit.getTripleCount();
             LOG.info("A harvesting is successfully finished : " + triplesCount);
@@ -99,7 +99,6 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
                 break;
             case UPLOAD_FILE:
                 url = new URL("file:" + sourceCSV);
-
                 break;
             }
             LOG.debug("url: " + url.toExternalForm());
@@ -109,7 +108,7 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
         return url;
     }
 
-    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu) {
+    private void performET(Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu) throws DPUException {
         AbstractDatanestHarvester<?> harvester;
         try {
             harvester = new PoliticalPartyDonationsDatanestHarvester(workingDirDpu.getAbsolutePath());
@@ -120,17 +119,16 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
             harvester.update();
         } catch (Exception e) {
             LOG.error("A problem occoured when a transformation csv -> rdf was performing", e);
-            context.sendMessage(MessageType.ERROR, e.getMessage());
+            throw new DPUException(e.getMessage(), e);
         }
     }
 
-    private void exportFiles(DPUContext context, String baseURI, FileExtractType extractType, String fileSuffix, boolean onlyThisSuffix, RDFFormat format,
-            HandlerExtractType handlerExtractType, File[] files) {
+    private void exportFiles(String baseURI, FileExtractType extractType, String fileSuffix, boolean onlyThisSuffix, RDFFormat format,
+                             HandlerExtractType handlerExtractType, File[] files) throws DPUException {
         for (File tmpRdf : files) {
             try {
                 String path = null;
                 if (tmpRdf.exists()) {
-
                     switch (extractType) {
                     case HTTP_URL:
                         path = tmpRdf.toURI().toString();
@@ -146,7 +144,7 @@ public class CsvPoliticalExtractor extends ConfigurableBase<CsvPoliticalExtracto
                 rdfDataUnit.extractFromFile(extractType, format, path, fileSuffix, baseURI, onlyThisSuffix, handlerExtractType);
             } catch (RDFException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
-                context.sendMessage(MessageType.ERROR, e.getMessage());
+                throw new DPUException(e.getMessage(), e);
             }
         }
     }

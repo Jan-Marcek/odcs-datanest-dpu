@@ -119,7 +119,6 @@ public class OrganizationRdfSerializer extends AbstractRdfSerializer<Organizatio
     public void store(List<OrganizationRecord> records) throws IllegalArgumentException {
 
         RdfData rdfData = null;
-        File fileRdf = null;
 
         try {
             rdfData = new RdfData(serialize(records), ORGANIZATIONS_BASE_URI, OPENDATA_ORGANIZATIONS_CONTEXTS_KEY);

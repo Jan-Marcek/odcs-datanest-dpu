@@ -75,9 +75,9 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
             LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());
             rdfDirectory = rdfsPath.toFile();
             URL sourceUrl = getSourceUrl(sourceCSV, extractType);
-            performET(context, batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
+            performET(batchSize, debugProcessOnlyNItems, sourceUrl, rdfDirectory);
             File[] files = getFiles(rdfDirectory);
-            exportFiles(context, baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
+            exportFiles(baseURI, extractType, fileSuffix, onlyThisSuffix, format, handlerExtractType, files);
             FileUtils.deleteDirectory(rdfDirectory);
             long triplesCount = rdfDataUnit.getTripleCount();
             LOG.info("A harvesting is successfully finished : " + triplesCount);
@@ -88,7 +88,7 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
         }
     }
 
-    private URL getSourceUrl(String sourceCSV, FileExtractType extractType) {
+    private URL getSourceUrl(String sourceCSV, FileExtractType extractType) throws DPUException {
         URL url = null;
         LOG.debug("sourceCSV: " + sourceCSV);
 
@@ -100,17 +100,18 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
                 break;
             case UPLOAD_FILE:
                 url = new URL("file:" + sourceCSV);
-
                 break;
             }
             LOG.debug("url: " + url.toExternalForm());
         } catch (IOException e) {
             LOG.error("An error occoured when path: " + sourceCSV + " was parsing.", e);
+            throw new DPUException(e.getMessage(), e);
         }
+
         return url;
     }
 
-    private void performET(DPUContext context, Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu) {
+    private void performET(Integer batchSize, Integer debugProcessOnlyNItems, URL url, File workingDirDpu) throws DPUException {
         AbstractDatanestHarvester<?> harvester;
         try {
             harvester = new ProcurementsDatanestHarvester(workingDirDpu.getAbsolutePath());
@@ -121,12 +122,12 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
             harvester.update();
         } catch (Exception e) {
             LOG.error("A problem occoured when a transformation csv -> rdf was performing", e);
-            context.sendMessage(MessageType.ERROR, e.getMessage());
+            throw new DPUException(e.getMessage(), e);
         }
     }
 
-    private void exportFiles(DPUContext context, String baseURI, FileExtractType extractType, String fileSuffix, boolean onlyThisSuffix, RDFFormat format,
-            HandlerExtractType handlerExtractType, File[] files) {
+    private void exportFiles(String baseURI, FileExtractType extractType, String fileSuffix, boolean onlyThisSuffix, RDFFormat format,
+            HandlerExtractType handlerExtractType, File[] files) throws DPUException {
         for (File tmpRdf : files) {
             try {
                 String path = null;
@@ -147,7 +148,7 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
                 }
             } catch (RDFException e) {
                 LOG.error("An error occoured when export was performing. A file: " + tmpRdf.getAbsolutePath(), e);
-                context.sendMessage(MessageType.ERROR, e.getMessage());
+                throw new DPUException(e.getMessage(), e);
             }
         }
     }
