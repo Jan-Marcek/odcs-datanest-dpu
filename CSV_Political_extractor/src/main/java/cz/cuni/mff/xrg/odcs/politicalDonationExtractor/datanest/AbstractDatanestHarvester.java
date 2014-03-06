@@ -55,7 +55,6 @@ public abstract class AbstractDatanestHarvester<RecordType extends AbstractRecor
         LOG.info("start performEtl on the path sourceFile");
 
         Vector<RecordType> records = new Vector<RecordType>();
-        try {
             Charset charset = Charset.forName("UTF8");
             CSVReader csvReader = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), charset)));
 
@@ -123,11 +122,6 @@ public abstract class AbstractDatanestHarvester<RecordType extends AbstractRecor
             // TODO: If there wont be any more specialized error handling here
             // in the future, try catching only 'Exception' to simplify the
             // code.
-        } catch (MalformedURLException e) {
-            LOG.error("malformed URL exception", e);
-        } catch (IOException e) {
-            LOG.error("IO exception", e);
-        }
         return records;
     }
 

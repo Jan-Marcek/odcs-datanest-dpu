@@ -134,8 +134,7 @@ public abstract class AbstractHarvester<RecordType extends AbstractRecord> {
      * Update our data using data harvested from source.
      *
      */
-    public void update() {
-        try {
+    public void update() throws Exception {
             // 1) download the source data into local temporary file using 'sourceUrl'
             // (or, if requested on admin console, retrieve latest copy from Jackrabbit
             // and use that instead of downloading fresh copy - in that case skip [2]
@@ -169,11 +168,6 @@ public abstract class AbstractHarvester<RecordType extends AbstractRecord> {
             // TODO
             if (!tempFile.delete())
                 logger.error("failed to delete temporary file " + tempFile.getAbsolutePath());
-        } catch (IOException e) {
-            logger.error("IO exception", e);
-        } catch (Exception e) {
-            logger.error("Exception", e);
-        }
 
     }
 }

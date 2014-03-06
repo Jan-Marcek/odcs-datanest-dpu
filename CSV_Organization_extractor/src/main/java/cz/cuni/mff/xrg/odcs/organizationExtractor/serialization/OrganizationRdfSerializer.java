@@ -1,6 +1,5 @@
 package cz.cuni.mff.xrg.odcs.organizationExtractor.serialization;
 
-import java.io.File;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -8,12 +7,12 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 
-import cz.cuni.mff.xrg.odcs.organizationExtractor.data.OrganizationRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import cz.cuni.mff.xrg.odcs.organizationExtractor.data.OrganizationRecord;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.data.RdfData;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.repository.OdnRepositoryStoreInterface;
 
@@ -116,15 +115,11 @@ public class OrganizationRdfSerializer extends AbstractRdfSerializer<Organizatio
     }
 
     @Override
-    public void store(List<OrganizationRecord> records) throws IllegalArgumentException {
+    public void store(List<OrganizationRecord> records) throws Exception {
 
         RdfData rdfData = null;
 
-        try {
-            rdfData = new RdfData(serialize(records), ORGANIZATIONS_BASE_URI, OPENDATA_ORGANIZATIONS_CONTEXTS_KEY);
-        } catch (Exception e) {
-            LOG.error("error", e);
-        }
+        rdfData = new RdfData(serialize(records), ORGANIZATIONS_BASE_URI, OPENDATA_ORGANIZATIONS_CONTEXTS_KEY);
 
         getRepository().store(rdfData);
     }

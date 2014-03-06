@@ -69,7 +69,6 @@ public abstract class AbstractHarvester<RecordType extends AbstractRecord> {
         this.serializers = new Vector<AbstractSerializer<RecordType, ?, ?>>();
     }
 
-
     public Integer getBatchSize() {
         return batchSize;
     }
@@ -79,6 +78,7 @@ public abstract class AbstractHarvester<RecordType extends AbstractRecord> {
     }
 
     private Integer batchSize = new Integer(100);
+
     // TODO remove this primaryRepository
     public Object getPrimaryRepository() {
         return primaryRepository;
@@ -134,48 +134,42 @@ public abstract class AbstractHarvester<RecordType extends AbstractRecord> {
 
     /**
      * Update our data using data harvested from source.
-     *
+     * 
      */
-    public void update() {
-        try {
-            // 1) download the source data into local temporary file using 'sourceUrl'
-            // (or, if requested on admin console, retrieve latest copy from Jackrabbit
-            // and use that instead of downloading fresh copy - in that case skip [2]
-            // and [3] of course)
-            URL url = getSourceUrl();
-            logger.info("start read from the path: " + url.toString());
-            File tempFile = File.createTempFile(ODN_HARVESTER_TMP_PREF, ODN_HARVESTER_TMP_SUFF);
-            tempFile.deleteOnExit();
+    public void update() throws Exception {
+        // 1) download the source data into local temporary file using 'sourceUrl'
+        // (or, if requested on admin console, retrieve latest copy from Jackrabbit
+        // and use that instead of downloading fresh copy - in that case skip [2]
+        // and [3] of course)
+        URL url = getSourceUrl();
+        logger.info("start read from the path: " + url.toString());
+        File tempFile = File.createTempFile(ODN_HARVESTER_TMP_PREF, ODN_HARVESTER_TMP_SUFF);
+        tempFile.deleteOnExit();
 
-            URLConnection csvConnection = url.openConnection();
-            csvConnection.setRequestProperty("User-Agent", "Open Data Node (http://opendata.sk/liferay/open-data-node)");
+        URLConnection csvConnection = url.openConnection();
+        csvConnection.setRequestProperty("User-Agent", "Open Data Node (http://opendata.sk/liferay/open-data-node)");
 
-            ReadableByteChannel rbc = Channels.newChannel(csvConnection.getInputStream());
-            FileOutputStream fos = new FileOutputStream(tempFile);
-            long count = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-            logger.debug("downloaded " + Long.toString(count) + " bytes from " + sourceUrl.toExternalForm() + " to " + tempFile.getAbsolutePath());
-            fos.close();
-            rbc.close();
+        ReadableByteChannel rbc = Channels.newChannel(csvConnection.getInputStream());
+        FileOutputStream fos = new FileOutputStream(tempFile);
+        long count = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        logger.debug("downloaded " + Long.toString(count) + " bytes from " + sourceUrl.toExternalForm() + " to " + tempFile.getAbsolutePath());
+        fos.close();
+        rbc.close();
 
-            // 2) use 'storeOriginalData()' to store that file into Jackrabbit
-            // TODO
+        // 2) use 'storeOriginalData()' to store that file into Jackrabbit
+        // TODO
 
-            // 3) determine, whether source file has been changed, if not stop
-            // TODO
+        // 3) determine, whether source file has been changed, if not stop
+        // TODO
 
-            // 4) extract data (for now done in 'genericUpate()', but renamed that
-            // to 'performEtl()' or 'processData()' or something
-            performEtl(tempFile);
+        // 4) extract data (for now done in 'genericUpate()', but renamed that
+        // to 'performEtl()' or 'processData()' or something
+        performEtl(tempFile);
 
-            // 5) clean-up: delete temporary files
-            // TODO
-            if (!tempFile.delete())
-                logger.error("failed to delete temporary file " + tempFile.getAbsolutePath());
-        } catch (IOException e) {
-            logger.error("IO exception", e);
-        } catch (Exception e) {
-            logger.error("Exception", e);
-        }
+        // 5) clean-up: delete temporary files
+        // TODO
+        if (!tempFile.delete())
+            logger.error("failed to delete temporary file " + tempFile.getAbsolutePath());
 
     }
 }

@@ -1,5 +1,7 @@
 package cz.cuni.mff.xrg.odcs.organizationExtractor.repository;
 
+import java.io.IOException;
+
 /**
  * This is a Open Data Node Repository interface defining "internal API" between "serialization" and "repository" classes.
  * 
@@ -16,7 +18,7 @@ public interface OdnRepositoryStoreInterface<RecordType> {
      * @throws IllegalArgumentException
      *             when some of the given arguments is not valid
      */
-    public void store(RecordType records) throws IllegalArgumentException;
+    public void store(RecordType records) throws IllegalArgumentException, IOException;
 
     /**
      * Shut down repository.

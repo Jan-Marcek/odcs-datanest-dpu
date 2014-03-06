@@ -71,7 +71,7 @@ public class FileSystemRepository implements OdnRepositoryStoreInterface<RdfData
      *             when initialization fails
      */
     @Override
-    public void store(RdfData records) throws IllegalArgumentException {
+    public void store(RdfData records) throws IllegalArgumentException, IOException {
         saveRdf(records.getRdfData());
     }
 
@@ -83,8 +83,7 @@ public class FileSystemRepository implements OdnRepositoryStoreInterface<RdfData
         this.targetRDF = targetRDF;
     }
 
-    private void saveRdf(String rdfData) {
-        try {
+    private void saveRdf(String rdfData) throws IOException {
             File directory = new File(this.targetRDF);
             if (!directory.exists()) {
                 boolean result = directory.mkdir();
@@ -100,9 +99,6 @@ public class FileSystemRepository implements OdnRepositoryStoreInterface<RdfData
             out.write(rdfData);
             out.close();
             logger.info("RDF saved to file " + fileRdf);
-        } catch (IOException e) {
-            logger.error("IO exception", e);
-        }
     }
 
     @Override

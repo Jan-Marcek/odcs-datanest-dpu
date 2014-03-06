@@ -1,6 +1,7 @@
 package cz.cuni.mff.xrg.odcs.politicalDonationExtractor.serialization;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -112,7 +113,7 @@ public class OrganizationRdfSerializer extends AbstractRdfSerializer<Organizatio
     }
 
     @Override
-    public void store(List<OrganizationRecord> records) throws IllegalArgumentException {
+    public void store(List<OrganizationRecord> records) throws IllegalArgumentException, IOException {
 
         RdfData rdfData = null;
         File fileRdf = null;

@@ -71,7 +71,7 @@ public class FileSystemRepository implements OdnRepositoryStoreInterface<RdfData
      *             when initialization fails
      */
     @Override
-    public void store(RdfData records) throws IllegalArgumentException {
+    public void store(RdfData records) throws IllegalArgumentException, IOException {
         saveRdf(records.getRdfData());
     }
 
@@ -83,26 +83,22 @@ public class FileSystemRepository implements OdnRepositoryStoreInterface<RdfData
         this.targetRDF = targetRDF;
     }
 
-    private void saveRdf(String rdfData) {
-        try {
-            File directory = new File(this.targetRDF);
-            if (!directory.exists()) {
-                boolean result = directory.mkdir();
-                if (!result) {
-                    logger.warn("A directory:" + this.getTargetRDF() + " is not created. You should check what happened. This is an error probably.");
-                }
+    private void saveRdf(String rdfData) throws IOException {
+        File directory = new File(this.targetRDF);
+        if (!directory.exists()) {
+            boolean result = directory.mkdir();
+            if (!result) {
+                logger.warn("A directory:" + this.getTargetRDF() + " is not created. You should check what happened. This is an error probably.");
             }
-
-            File fileRdf = File.createTempFile("odn-", ".rdf", directory);
-            Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileRdf), Charset.forName("UTF-8")));
-
-            BufferedWriter out = new BufferedWriter(writer);
-            out.write(rdfData);
-            out.close();
-            logger.info("RDF saved to file " + fileRdf);
-        } catch (IOException e) {
-            logger.error("IO exception", e);
         }
+
+        File fileRdf = File.createTempFile("odn-", ".rdf", directory);
+        Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileRdf), Charset.forName("UTF-8")));
+
+        BufferedWriter out = new BufferedWriter(writer);
+        out.write(rdfData);
+        out.close();
+        logger.info("RDF saved to file " + fileRdf);
     }
 
     @Override
