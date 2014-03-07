@@ -1,5 +1,7 @@
 package cz.cuni.mff.xrg.odcs.organizationExtractor.test;
 
+import java.net.URL;
+
 import cz.cuni.mff.xrg.odcs.dpu.test.TestEnvironment;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.core.CsvOrganizationExtractor;
 import cz.cuni.mff.xrg.odcs.organizationExtractor.core.CsvOrganizationExtractorConfig;
@@ -14,10 +16,12 @@ public class TestIt {
         CsvOrganizationExtractor extractor = new CsvOrganizationExtractor();
         CsvOrganizationExtractorConfig config = new CsvOrganizationExtractorConfig();
         config.DebugProcessOnlyNItems = 10;
-        String fileUrl = "file:/e:/eea/comsode/dataset/org/organization_small.csv";
-        String remoteUrl = "http://localhost:8000/organization_small.csv";
-        config.Path = fileUrl;
 
+        URL url = this.getClass().getResource("/organization_small.csv");
+        String remoteUrl = "http://localhost:8000/organization_small.csv";
+
+        String fileUrl = url.getPath();
+        config.Path = fileUrl;
         config.fileExtractType = FileExtractType.UPLOAD_FILE;
         extractor.configureDirectly(config);
 
