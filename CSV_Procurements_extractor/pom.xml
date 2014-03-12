@@ -17,16 +17,9 @@
     <properties>
         <dpu.package>cz.cuni.mff.xrg.odcs.procurementExtractor.core</dpu.package>
         <dpu.mainClass>CsvProcurementsExtractor</dpu.mainClass>
-        <solr.version>3.6.1</solr.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-solrj</artifactId>
-            <version>${solr.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>

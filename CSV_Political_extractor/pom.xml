@@ -7,7 +7,6 @@
         <groupId>cz.cuni.mff.xrg.odcs</groupId>
         <artifactId>module-base</artifactId>
         <version>1.0.0</version>
-        <relativePath>../module-base/pom.xml</relativePath>
     </parent>
 
     <artifactId>CSV_Political_extractor</artifactId>
@@ -17,24 +16,14 @@
     <properties>
         <dpu.package>cz.cuni.mff.xrg.odcs.politicalDonationExtractor.core</dpu.package>
         <dpu.mainClass>CsvPoliticalExtractor</dpu.mainClass>
-        <solr.version>3.6.1</solr.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-solrj</artifactId>
-            <version>${solr.version}</version>
-
-
-        </dependency>
-
-        <dependency>
+         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.8.3</version>
             <scope>provided</scope>
-
         </dependency>
 
         <dependency>
@@ -43,6 +32,7 @@
             <version>3.1</version>
             <scope>provided</scope>
         </dependency>
+		
 
         <dependency>
             <groupId>junit</groupId>

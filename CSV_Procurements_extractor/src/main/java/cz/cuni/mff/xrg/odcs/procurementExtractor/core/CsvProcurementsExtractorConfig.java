@@ -12,7 +12,7 @@ import cz.cuni.mff.xrg.odcs.rdf.enums.RDFFormatType;
  */
 public class CsvProcurementsExtractorConfig extends DPUConfigObjectBase {
 
-    public String Path = "e:/eea/comsode/dataset/procurements-dump.csv";
+    public String Path = "";
     public RDFFormatType RDFFormatValue = RDFFormatType.AUTO;
     public String FileSuffix = "";
 

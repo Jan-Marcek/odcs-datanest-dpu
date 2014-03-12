@@ -17,3 +17,4 @@ CSV_Political_extractor/.idea
 CSV_Political_extractor/target/
 CSV_Procurements_extractor/.idea
 >>>>>>> political_dpu
+*.iml

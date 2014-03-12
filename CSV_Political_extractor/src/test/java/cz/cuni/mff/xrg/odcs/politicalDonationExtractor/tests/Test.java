@@ -1,31 +1,30 @@
-package cz.cuni.mff.xrg.odcs.organizationExtractor.test;
+package cz.cuni.mff.xrg.odcs.politicalDonationExtractor.tests;
+
+import cz.cuni.mff.xrg.odcs.commons.configuration.ConfigException;
+import cz.cuni.mff.xrg.odcs.dpu.test.TestEnvironment;
+import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.core.CsvPoliticalExtractor;
+import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.core.CsvPoliticalExtractorConfig;
+import cz.cuni.mff.xrg.odcs.rdf.enums.FileExtractType;
+import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 import java.net.URL;
 
-import cz.cuni.mff.xrg.odcs.dpu.test.TestEnvironment;
-import cz.cuni.mff.xrg.odcs.organizationExtractor.core.CsvOrganizationExtractor;
-import cz.cuni.mff.xrg.odcs.organizationExtractor.core.CsvOrganizationExtractorConfig;
-import cz.cuni.mff.xrg.odcs.rdf.enums.FileExtractType;
-import cz.cuni.mff.xrg.odcs.rdf.exceptions.RDFException;
-import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
-
-public class TestIt {
+public class Test {
 
     @org.junit.Test
-    public void test() throws Exception, RDFException {
-        CsvOrganizationExtractor extractor = new CsvOrganizationExtractor();
-        CsvOrganizationExtractorConfig config = new CsvOrganizationExtractorConfig();
+    public void test() throws ConfigException {
+        CsvPoliticalExtractor extractor = new CsvPoliticalExtractor();
+        CsvPoliticalExtractorConfig config = new CsvPoliticalExtractorConfig();
         config.DebugProcessOnlyNItems = 10;
-
-        URL url = this.getClass().getResource("/organization_small.csv");
-        String remoteUrl = "http://localhost:8000/organization_small.csv";
+        URL url = this.getClass().getResource("/political-dump.csv");
+        String remoteUrl = "http://localhost:8000/political-dump.csv";
 
         String fileUrl = url.getPath();
         config.Path = fileUrl;
         config.fileExtractType = FileExtractType.UPLOAD_FILE;
+        TestEnvironment env = TestEnvironment.create();
         extractor.configureDirectly(config);
 
-        TestEnvironment env = TestEnvironment.create();
         try {
             RDFDataUnit output = env.createRdfOutput("output", false);
             // run the execution
@@ -33,7 +32,6 @@ public class TestIt {
             env.run(extractor);
         } catch (Exception e) {
             e.printStackTrace();
-
         } finally {
             // release resources
             env.release();
