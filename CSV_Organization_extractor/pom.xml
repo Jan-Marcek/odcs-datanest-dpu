@@ -9,7 +9,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>Csv_Organization_Extractor</artifactId>
+    <artifactId>CSV_Organization_Extractor</artifactId>
     <packaging>bundle</packaging>
     <description>Extracts RDF data from a file.</description>
 
