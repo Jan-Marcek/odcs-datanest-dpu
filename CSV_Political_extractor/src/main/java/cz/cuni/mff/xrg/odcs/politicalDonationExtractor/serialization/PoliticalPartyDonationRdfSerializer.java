@@ -15,9 +15,6 @@ import org.w3c.dom.Element;
 import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.data.PoliticalPartyDonationRecord;
 import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.data.RdfData;
 
-/**
- * Created with IntelliJ IDEA. User: janci Date: 4.12.2013 Time: 13:36 To change this template use File | Settings | File Templates.
- */
 public class PoliticalPartyDonationRdfSerializer extends AbstractRdfSerializer<PoliticalPartyDonationRecord> {
 
     // TODO: do we need that configurable? if we want the that RDF data

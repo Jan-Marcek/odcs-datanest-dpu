@@ -30,7 +30,7 @@ public class Test {
             String input = null;
             env.run(extractor);
         } catch (Exception e) {
-            e.printStackTrace(); // To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace(); 
         } finally {
             // release resources
             env.release();

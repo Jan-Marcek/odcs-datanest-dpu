@@ -17,9 +17,6 @@ import org.openrdf.repository.config.RepositoryConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created with IntelliJ IDEA. User: janci Date: 4.12.2013 Time: 13:35 To change this template use File | Settings | File Templates.
- */
 public class PoliticalPartyDonationsDatanestHarvester extends AbstractDatanestHarvester<PoliticalPartyDonationRecord> {
 
     public final static String KEY_DATANEST_PPD_URL_KEY = "datanest.political_party_donors.url";

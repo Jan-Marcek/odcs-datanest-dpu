@@ -2,9 +2,6 @@ package cz.cuni.mff.xrg.odcs.politicalDonationExtractor.data;
 
 import java.util.Date;
 
-/**
- * Created with IntelliJ IDEA. User: janci Date: 4.12.2013 Time: 13:35 To change this template use File | Settings | File Templates.
- */
 public class PoliticalPartyDonationRecord extends AbstractRecord {
     private String datanestId;
     private String donorName;
