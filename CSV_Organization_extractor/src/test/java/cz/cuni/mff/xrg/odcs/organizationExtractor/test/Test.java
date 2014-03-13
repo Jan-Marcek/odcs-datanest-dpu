@@ -18,9 +18,9 @@ public class Test {
         config.DebugProcessOnlyNItems = 10;
         URL url = this.getClass().getResource("/organization_small.csv");
         String remoteUrl = "http://localhost:8000/organization_small.csv";
-        String fileUrl = url.getPath();
+        String fileUrl = url.toURI().toURL().toExternalForm();
         config.Path = fileUrl;
-        config.fileExtractType = FileExtractType.UPLOAD_FILE;
+        config.fileExtractType = FileExtractType.PATH_TO_FILE;
         extractor.configureDirectly(config);
 
         TestEnvironment env = TestEnvironment.create();

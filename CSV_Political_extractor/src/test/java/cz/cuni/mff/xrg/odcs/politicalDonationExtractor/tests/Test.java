@@ -7,21 +7,23 @@ import cz.cuni.mff.xrg.odcs.politicalDonationExtractor.core.CsvPoliticalExtracto
 import cz.cuni.mff.xrg.odcs.rdf.enums.FileExtractType;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class Test {
 
     @org.junit.Test
-    public void test() throws ConfigException {
+    public void test() throws ConfigException, URISyntaxException, MalformedURLException {
         CsvPoliticalExtractor extractor = new CsvPoliticalExtractor();
         CsvPoliticalExtractorConfig config = new CsvPoliticalExtractorConfig();
         config.DebugProcessOnlyNItems = 10;
         URL url = this.getClass().getResource("/political-dump.csv");
         String remoteUrl = "http://localhost:8000/political-dump.csv";
 
-        String fileUrl = url.getPath();
+        String fileUrl = url.toURI().toURL().toExternalForm();
         config.Path = fileUrl;
-        config.fileExtractType = FileExtractType.UPLOAD_FILE;
+        config.fileExtractType = FileExtractType.PATH_TO_FILE;
         TestEnvironment env = TestEnvironment.create();
         extractor.configureDirectly(config);
 

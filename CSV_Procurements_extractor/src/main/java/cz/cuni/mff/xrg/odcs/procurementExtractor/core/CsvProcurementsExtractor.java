@@ -69,7 +69,7 @@ public class CsvProcurementsExtractor extends ConfigurableBase<CsvProcurementsEx
         File rdfDirectory = null;
 
         try {
-            File globalDirectory = context.getGlobalDirectory();
+            File globalDirectory = context.getWorkingDir();
             Path path = globalDirectory.toPath();
             Path rdfsPath = Files.createTempDirectory(path, "");
             LOG.debug("created a temp file. Path: " + rdfsPath.toAbsolutePath());

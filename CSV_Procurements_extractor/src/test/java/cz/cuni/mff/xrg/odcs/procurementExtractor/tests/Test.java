@@ -7,30 +7,31 @@ import cz.cuni.mff.xrg.odcs.procurementExtractor.core.CsvProcurementsExtractorCo
 import cz.cuni.mff.xrg.odcs.rdf.enums.FileExtractType;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class Test {
 
     @org.junit.Test
-    public void test() throws ConfigException {
+    public void test() throws ConfigException, URISyntaxException, MalformedURLException {
         CsvProcurementsExtractor extractor = new CsvProcurementsExtractor();
         CsvProcurementsExtractorConfig config = new CsvProcurementsExtractorConfig();
         config.DebugProcessOnlyNItems = 10;
         URL url = this.getClass().getResource("/procurements_dataset.csv");
         String remoteUrl = "http://localhost:8000/procurements_dataset.csv";
 
-        String fileUrl = url.getPath();
+        String fileUrl = url.toURI().toURL().toExternalForm();
         config.Path = fileUrl;
-        config.fileExtractType = FileExtractType.UPLOAD_FILE;
+        config.fileExtractType = FileExtractType.PATH_TO_FILE;
         extractor.configureDirectly(config);
         TestEnvironment env = TestEnvironment.create();
         try {
             RDFDataUnit output = env.createRdfOutput("output", false);
             // run the execution
-            String input = null;
             env.run(extractor);
         } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         } finally {
             // release resources
             env.release();

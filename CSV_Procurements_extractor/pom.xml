@@ -10,7 +10,7 @@
         <relativePath>../module-base/pom.xml</relativePath>
     </parent>
 
-    <artifactId>CSV_Procurements_extractor</artifactId>
+    <artifactId>CSV_Procurements_Extractor</artifactId>
     <packaging>bundle</packaging>
     <description>Extracts RDF data from a file.</description>
 
