@@ -1,5 +1,3 @@
-**/.idea
-**/target 
 *.iml
 CSV_Political_extractor/target/
 CSV_Procurements_extractor/target/
